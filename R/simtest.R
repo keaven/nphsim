@@ -1,47 +1,40 @@
-library(gsDesign)
-library(data.table)
-
+#' Testing for a time-to-event study simulation
+#' 
+#' Description here
+#' simulation test: provide # of events/timing at specified timing/# of events
+#'                  provide HR and p-value at specified timing/events
+#'                  provide boundary crossing probability (experimental: cannot update boundary at different # of events)
+#' 
+#' Details here
+#'
+#' @param x list genearted by simulation
+#' @param anaT Calendar time for reporting, testing, and boundary crossing 
+#' probability when a gsDesign object is specified.
+#' @param anaD Events driven for reporting, testing, and boundary crossing 
+#' probability when a gsDesign object is specified.
+#' @param anatype use specified timing ('anaT') if 'calendar'; 
+#' use specified number of events ('anaD') if 'event'; 
+#' use the maximum of the two if 'both'
+#' CAN INDIVIDUAL VALUES BE MISSING SO that, e.g. SOME CAN BE BOTH, BUT FINAL IS EVENTS?
+#' @param method statistical testing method to be applied to simulated data. 
+#' @param stratum definition TBD
+#' @param fparam definition TBD
+#' @param d=NULL A 'gsDesign' object. Timing/Events and the boundary will be 
+#' updated upon output.
+#' @examples
+#' # examples here
+#'
+#' @export
+#' @return
+#' Needs update!
 #######################################################################################
-## Update gsDesign object boundary based on actual number of events
-#######################################################################################
-gsUpdate <- function(dth, d, b) {
-  ##b=1 upper bound, b=0 lower bound
-  dnew <-
-    gsDesign(
-      k = d$k,
-      test.type = d$test.type,
-      alpha = d$alpha,
-      beta = d$beta,
-      n.fix = d$n.fix,
-      sfu = d$upper$sf,
-      sfupar = d$upper$param,
-      sfl = d$lower$sf,
-      sflpar = d$lower$param,
-      n.I = dth,
-      maxn.IPlan = d$n.I[d$k]
-    )
-  if (b == 1) {
-    y <- pnorm(dnew$upper$bound, lower.tail = FALSE)
-  } else{
-    y <- pnorm(dnew$lower$bound, lower.tail = FALSE)
-  }
-  return(y)
-}
-
-
-#######################################################################################
-## simulation test: provide # of events/timing at specified timing/# of events
-##                  provide HR and p-value at specified timing/events
-##                  provide boundary crossing probability (experimental: cannot update boundary at different # of events)
-#######################################################################################
-simtest <- function(x # list genearted by simulation
-                    ,anaT=NULL # Calendar time for reporting, testing, and boundary crossing probability when a gsDesign object is specified.
-                    ,anaD=NULL # Events driven for reporting, testing, and boundary crossing probability when a gsDesign object is specified.
-                    ,anatype='event' # use specified timing(anaT) if 'calendar'; use specified # of events(anaD) if 'event'; use the maximum of the two if 'both'
-                    ,method=NULL # statistical testing on simulated data. 
+simtest <- function(x 
+                    ,anaT=NULL 
+                    ,anaD=NULL 
+                    ,anatype='event' 
                     ,stratum=NULL
                     ,fparam=NULL
-                    ,d=NULL # An gsDesign object as input. Timing/Events and the boundary will be used.
+                    ,d=NULL 
                     )
 {
   if (anatype %in% c('event', 'calendar', 'both')) {
@@ -176,3 +169,5 @@ simtest <- function(x # list genearted by simulation
   
   return(y)
 }  
+#' import(gsDesign)
+#' import(data.table)

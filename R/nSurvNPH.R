@@ -1,3 +1,55 @@
+#' Sample Size Under Non-Propotional Hazards Assumptions
+#'
+#' Description text; note that parameter descriptions below as well as text for 
+#' help file needs to be updated.
+#'
+#' Details text
+#'
+#' @param lambdaC scalar, vector or matrix of event hazard rates for the 
+#' control group; rows represent time periods while columns represent strata; a vector implies a single stratum.
+#' @param hr hazard ratio (experimental/control) under the alternate hypothesis (scalar)
+#' @param hr0 hazard ratio (experimental/control) under the null hypothesis (scalar)
+#' @param etaC scalar, vector or matrix of dropout hazard rates for the control group; rows represent time periods while columns represent strata; if entered as a scalar, rate is constant accross strata and time periods; 
+#' if entered as a vector, rates are constant accross strata
+#' @param etaE matrix dropout hazard rates for the experimental group specified 
+#' in like form as eta; if NULL, this is set equal to eta
+#' @param NONCMPL TBD
+#' @param DROPIN TBD
+#' @param gamma NONCMPL a scalar, vector or matrix of rates of entry by time period (rows) 
+#' and strata (columns); if entered as a scalar, rate is constant accross strata 
+#' and time periods; if entered as a vector, rates are constant accross strata
+#' @param R a scalar or vector of durations of time periods for recruitment rates 
+#' specified in rows of gamma. Length is the same as number of rows in gamma. 
+#' Note that when variable enrollment duration is specified (input T=NULL), 
+#' the final enrollment period is extended as long as needed
+#' @param S a scalar or vector of durations of piecewise constant event rates 
+#' specified in rows of lambda, eta and etaE; this is NULL if there is a single 
+#' event rate per stratum (exponential failure) or length of the number of rows 
+#' in lambda minus 1, otherwise
+#' @param T study duration; if T is input as NULL, this will be computed on output; 
+#' see details.
+#' @param minfup follow-up of last patient enrolled; if minfup is input as NULL, 
+#' this will be computed on output; see details
+#' @param ratio randomization ratio of experimental treatment divided by control; 
+#' normally a scalar, but may be a vector with length equal to number of strata.
+#' @param alpha type I error rate. Default is 0.025 since 1-sided testing is default
+#' @param beta type II error rate. Default is 0.10 (90% power); 
+#' NULL if power is to be computed based on other input values
+#' @param sided 1 for 1-sided testing, 2 for 2-sided testing
+#' @param tol or cases when T or minfup values are derived through root finding (T or minfup input as NULL), 
+#' tol provides the level of error input to the uniroot() root-finding function. The default is the same as for uniroot.
+#' @param SBDV TBD
+#' @param SIMULT TBD
+#' @param TRT_LAG lag treatment
+#' @param nstrata TBD
+#' @examples 
+#' #no staggered entry, no lag time;
+#' #no staggered entry, lag time;
+#' #stagger entry, no lag time
+#' #stagged entry; lag time;
+#' #strata;
+#' 
+#' @export
 nSurvNPH<-function ( lambdaC=log(2)/6
                     ,hr = 0.6
                     ,hr0 = 1
@@ -271,9 +323,10 @@ output<-list(DSTR=DSTR,alpha=alpha, beta=beta
 return(output)
 
 }
+#'
+#' @importFrom(gsDesign)
 
 
-#nSurvNPH();
 #no staggered entry, no lag time;
 
 #no staggered entry, lag time;

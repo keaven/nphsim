@@ -1,14 +1,34 @@
-nphsim <- function(nsim = 100 # Number of simulations
-                  ,lambdaC = NULL # Hazard rate of control arm. Specify a vector for piecewise hazard with duration specified in "intervals"
-                  ,lambdaE = NULL # Hazard rate of experiment arm. Specify a vector for piecewise hazard with duration specified in "intervals"
-                  ,intervals = NULL # Duration of period in which hazard is constant as specified in lambdaC. A vector with length(lambdaC)-1
-                  ,ssC = NULL # Sample size of control arm
-                  ,ssE = NULL # Sample size of experiment arm
-                  ,gamma = NULL # A vector of rate of enrollment in unit time
-                  ,R = NULL # A vector of duration of time periods for recruitment with rate specified in gamma
-                  ,eta = NULL # A scalar for dropout rate per unit time for control arm
-                  ,etaE = NULL # A scalar for dropout rate per unit time for experiment arm
-                  ,d = NULL # An gsSurv object as input. The other inputs overwrite the corresponding parameters if not NULL
+#' Simulate a Clinical Trial with Piecewise Exponential Time-to-Event Outcomes
+#'
+#' Description text
+#'
+#' Details text
+#'
+#' @param nsim Number of simulations
+#' @param lambdaC Hazard rate of control arm. Specify a vector for piecewise hazard with duration specified in "intervals"
+#' @param lambdaE Hazard rate of experiment arm. Specify a vector for piecewise hazard with duration specified in "intervals"
+#' @param intervals Duration of period in which hazard is constant as specified in lambdaC. A vector with length(lambdaC)-1
+#' @param ssC Sample size of control arm
+#' @param ssE Sample size of experiment arm
+#' @param gamma A vector of rate of enrollment in unit time
+#' @param R A vector of duration of time periods for recruitment with rate specified in gamma
+#' @param eta A vector for dropout rate per unit time for control arm
+#' @param etaE A vector for dropout rate per unit time for experiment arm
+#' @param An gsSurv object as input. The other inputs overwrite the corresponding parameters if not NULL
+#' @examples
+#' # TBD
+#' @export
+nphsim <- function(nsim = 100
+                  ,lambdaC = NULL
+                  ,lambdaE = NULL
+                  ,intervals = NULL
+                  ,ssC = NULL
+                  ,ssE = NULL
+                  ,gamma = NULL
+                  ,R = NULL
+                  ,eta = NULL
+                  ,etaE = NULL
+                  ,d = NULL
                   )
 {
   ## use gsSurv object if provided, values can be overwritten by other parameters
@@ -81,6 +101,8 @@ nphsim <- function(nsim = 100 # Number of simulations
           simd=x)
   return(y)
 }
+#'
+#' @importFrom(gsDesign)
 
 
 
