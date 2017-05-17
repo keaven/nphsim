@@ -1,39 +1,25 @@
-library(gsDesign)
-library(data.table)
-
-#######################################################################################
-## Update gsDesign object boundary based on actual number of events
-#######################################################################################
-gsUpdate <- function(dth, d, b) {
-  ##b=1 upper bound, b=0 lower bound
-  dnew <-
-    gsDesign(
-      k = d$k,
-      test.type = d$test.type,
-      alpha = d$alpha,
-      beta = d$beta,
-      n.fix = d$n.fix,
-      sfu = d$upper$sf,
-      sfupar = d$upper$param,
-      sfl = d$lower$sf,
-      sflpar = d$lower$param,
-      n.I = dth,
-      maxn.IPlan = d$n.I[d$k]
-    )
-  if (b == 1) {
-    y <- pnorm(dnew$upper$bound, lower.tail = FALSE)
-  } else{
-    y <- pnorm(dnew$lower$bound, lower.tail = FALSE)
-  }
-  return(y)
-}
-
-
-#######################################################################################
-## simulation test: provide # of events/timing at specified timing/# of events
-##                  provide HR and p-value at specified timing/events
-##                  provide boundary crossing probability (experimental: cannot update boundary at different # of events)
-#######################################################################################
+#' Simulation of Time-to-Event P-Values
+#' 
+#' Description here
+#' 
+#' simulation test: provide # of events/timing at specified timing/# of events;
+#' provide HR and p-value at specified timing/events;
+#' provide boundary crossing probability 
+#' (experimental: cannot update boundary at different # of events)
+#' @param x list genearted by simulation
+#' @param anaT Calendar time for reporting, testing, and boundary crossing probability when a gsDesign object is specified.
+#' @param anaD Events driven for reporting, testing, and boundary crossing probability when a gsDesign object is specified.
+#' @param anatype use specified timing(anaT) if 'calendar'; use specified # of events(anaD) if 'event'
+#' @param method statistical testing on simulated data. 
+#' @param stratum TBD
+#' @param fparam TBD
+#' @param d A gsDesign object as input. Timing/Events and the boundary will be used.
+#' @examples
+#' # examples here
+#'
+#' @export
+#' @return
+#' Needs update!
 simtestp <- function(x # list genearted by simulation
                     ,anaT=NULL # Calendar time for reporting, testing, and boundary crossing probability when a gsDesign object is specified.
                     ,anaD=NULL # Events driven for reporting, testing, and boundary crossing probability when a gsDesign object is specified.
