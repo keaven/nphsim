@@ -12,6 +12,7 @@
 #' @examples
 #' # TBD
 #' @export
+#' @import survMisc
 wlr.Stat<-function (survival,cnsr,trt,stra=NULL,fparam) {
   d<-data.table(survival=survival,cnsr=cnsr,trt=trt)
   x<-ten(survfit(Surv(survival, 1-cnsr) ~ trt,data=d))

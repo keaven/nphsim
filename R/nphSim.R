@@ -18,6 +18,8 @@
 #' @examples
 #' # TBD
 #' @export
+#' @import gsDesign
+#' @import data.table
 nphsim <- function(nsim = 100
                   ,lambdaC = NULL
                   ,lambdaE = NULL
@@ -66,9 +68,9 @@ nphsim <- function(nsim = 100
   tC <- rpwexp(ssC*nsim, rate = lambdaC, intervals = intervals)
   tE <- rpwexp(ssE*nsim, rate = lambdaE, intervals = intervals)
   ## adding LTFU
-  xC<-data.table(sim=c(1:nsim),t=tC,treatment='control')
+  xC<-data.table::data.table(sim=c(1:nsim),t=tC,treatment='control')
   xC[,ltfuT:=rpwexp(ssC*nsim, rate = etaC+1e-8, intervals = intervals)]
-  xE<-data.table(sim=c(1:nsim),t=tE,treatment='experiment')
+  xE<-data.table::data.table(sim=c(1:nsim),t=tE,treatment='experiment')
   xE[,ltfuT:=rpwexp(ssE*nsim, rate = etaE+1e-8, intervals = intervals)]
 
   x <- rbind(xC,xE)
@@ -87,6 +89,7 @@ nphsim <- function(nsim = 100
   #T <- 99999
   #x[,survival:= ifelse(ct>T, T-enterT, t1)]
   #x[,cnsr:=ifelse(ct>T, 1, cnsr1)]
+  x[,survival:=t1][,cnsr:=cnsr1]
   x[,c("cnsr1","t1","t","ltfuT","ct"):=NULL]  ## remove intermediate variables
   x[,treatment:=relevel(factor(treatment),ref='control')]  ## set control as reference level
 
@@ -105,7 +108,6 @@ nphsim <- function(nsim = 100
 }
 #'
 #' @importFrom(gsDesign)
-
 
 
 

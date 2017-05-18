@@ -27,11 +27,14 @@
 #' @export
 #' @return
 #' Needs update!
+#' @import gsDesign
+#' @import data.table
 #######################################################################################
 simtest <- function(x 
                     ,anaT=NULL 
                     ,anaD=NULL 
-                    ,anatype='event' 
+                    ,anatype='event'
+                    ,method=NULL
                     ,stratum=NULL
                     ,fparam=NULL
                     ,d=NULL 
@@ -63,7 +66,7 @@ simtest <- function(x
       anaD
     }
   }
-
+  
   if (anatype=='calendar'){
     ## use anaT for calendar based interim analyses
     DT.t <- data.table(t = anaT,
@@ -72,32 +75,10 @@ simtest <- function(x
     DT.x <- data.table(x$simd, k = 1)
     DT.sim <- merge(DT.t, DT.x, by = "k", allow.cartesian = TRUE)
     DT.sim [, aval := ifelse(survival + enterT > t, t - enterT, survival)
-          ][, cnsr := ifelse(survival + enterT > t, 1, cnsr)
-          ][, c("k","survival"):=NULL]
+            ][, cnsr := ifelse(survival + enterT > t, 1, cnsr)
+              ][, c("k","survival"):=NULL]
   } else if (anatype == 'event') {
     ## use anaD for event driven interim analyses
-    dt <- data.table(x$simd,
-                     ct = x$simd$survival + x$simd$enterT,
-                     k = 1)
-    setorderv(dt, c("sim", "cnsr", "ct"), c(1, 1, 1))
-    dt <- dt[, evn := c(1:(x$ssC + x$ssE))
-           ][, evn := ifelse(cnsr == 1, 9999, evn)]
-    DT.D <- data.table(D = anaD,
-                       analysis = c(1:length(anaD)),
-                       k = 1)
-    DT.sim1 <- merge(dt, DT.D, by = "k", allow.cartesian = TRUE)
-    survt <- DT.sim1[evn == D, .(sim, t = ct, D)]
-    DT.sim <- merge(DT.sim1, survt, by = c("sim", "D"), all.x = TRUE)
-    DT.sim[, t := ifelse(is.na(t), 99999, t)
-          ][, survival2 := ifelse(ct <= t, survival, t - enterT)
-          ][, cnsr2 := ifelse(ct <= t, cnsr, 1)
-          ][, aval := survival2][, cnsr := cnsr2
-          ][, c("k","survival","evn","survival2","cnsr2","ct"):=NULL]
-          
-  } else if (anatype == 'both') {## take the max event/calendar time of anaT and anaD for each analysis
-    if (length(anaT)!=length(anaD)){
-      stop("anaT and anaD need to have the same length")
-    } else {
     dt <- data.table(x$simd,
                      ct = x$simd$survival + x$simd$enterT,
                      k = 1)
@@ -108,11 +89,33 @@ simtest <- function(x
                        analysis = c(1:length(anaD)),
                        k = 1)
     DT.sim1 <- merge(dt, DT.D, by = "k", allow.cartesian = TRUE)
-    survt <- DT.sim1[evn == D, .(sim, anaDt = ct, D)]
+    survt <- DT.sim1[evn == D, .(sim, t = ct, D)]
     DT.sim <- merge(DT.sim1, survt, by = c("sim", "D"), all.x = TRUE)
-    DT.sim[, anaDt := ifelse(is.na(anaDt), 99999, anaDt)]
-    DT.sim[, anaTt:=anaT[analysis]][,t:=max(anaDt,anaTt),by=.(sim, analysis)]
-    DT.sim[, survival2 := ifelse(ct <= t, survival, t - enterT)
+    DT.sim[, t := ifelse(is.na(t), 99999, t)
+           ][, survival2 := ifelse(ct <= t, survival, t - enterT)
+             ][, cnsr2 := ifelse(ct <= t, cnsr, 1)
+               ][, aval := survival2][, cnsr := cnsr2
+                                      ][, c("k","survival","evn","survival2","cnsr2","ct"):=NULL]
+    
+  } else if (anatype == 'both') {## take the max event/calendar time of anaT and anaD for each analysis
+    if (length(anaT)!=length(anaD)){
+      stop("anaT and anaD need to have the same length")
+    } else {
+      dt <- data.table(x$simd,
+                       ct = x$simd$survival + x$simd$enterT,
+                       k = 1)
+      setorderv(dt, c("sim", "cnsr", "ct"), c(1, 1, 1))
+      dt <- dt[, evn := c(1:(x$ssC + x$ssE))
+               ][, evn := ifelse(cnsr == 1, 9999, evn)]
+      DT.D <- data.table(D = anaD,
+                         analysis = c(1:length(anaD)),
+                         k = 1)
+      DT.sim1 <- merge(dt, DT.D, by = "k", allow.cartesian = TRUE)
+      survt <- DT.sim1[evn == D, .(sim, anaDt = ct, D)]
+      DT.sim <- merge(DT.sim1, survt, by = c("sim", "D"), all.x = TRUE)
+      DT.sim[, anaDt := ifelse(is.na(anaDt), 99999, anaDt)]
+      DT.sim[, anaTt:=anaT[analysis]][,t:=max(anaDt,anaTt),by=.(sim, analysis)]
+      DT.sim[, survival2 := ifelse(ct <= t, survival, t - enterT)
              ][, cnsr2 := ifelse(ct <= t, cnsr, 1)
                ][, aval := survival2][, cnsr := cnsr2
                                       ][, c("k","survival","evn","survival2","cnsr2","ct"):=NULL]
@@ -145,29 +148,27 @@ simtest <- function(x
     if (!is.null(d)) {
       if (is.null(flag)){  ### use the original boundary nominal p-values
         result[,pvupper:=pnorm(d$upper$bound,lower.tail=FALSE)
-             ][,pvlower:=pnorm(d$lower$bound,lower.tail=(d$test.type==2))]
+               ][,pvlower:=pnorm(d$lower$bound,lower.tail=(d$test.type==2))]
       } else {  ### update boundary nominal p-values
         result[,pvupper:=gsUpdate(D,d,1),by=sim
-             ][,pvlower:=gsUpdate(D,d,2),by=sim]
+               ][,pvlower:=gsUpdate(D,d,2),by=sim]
       }
       ## checking boundary crossing while taking history into account
       result[,xeff1:=ifelse(pval<pvupper,1,0)
-           ][,xfut1:=ifelse(pval>pvlower,1,0)
-           ][,xeff2:=ifelse(cumsum(xeff1)>0,1,0), by=sim
-           ][,xfut2:=ifelse(cumsum(xfut1)>0,1,0), by=sim
-           ][,fstfl:=ifelse(sum(xeff2)>sum(xfut2),1,0), by=sim
-           ][,xeff:=xeff2*fstfl][,xfut:=xfut2*(1-fstfl)
-           ][,c("fstfl","xeff1","xeff2","xfut1","xfut2"):=NULL]
+             ][,xfut1:=ifelse(pval>pvlower,1,0)
+               ][,xeff2:=ifelse(cumsum(xeff1)>0,1,0), by=sim
+                 ][,xfut2:=ifelse(cumsum(xfut1)>0,1,0), by=sim
+                   ][,fstfl:=ifelse(sum(xeff2)>sum(xfut2),1,0), by=sim
+                     ][,xeff:=xeff2*fstfl][,xfut:=xfut2*(1-fstfl)
+                                           ][,c("fstfl","xeff1","xeff2","xfut1","xfut2"):=NULL]
     }
   }
-
+  
   
   if (is.null(result)){resultall<-tmp}else{resultall<-result}
-
+  
   y<-list(anaT=anaT, anaD=anaD, anatype=anatype, method=method,result=resultall, gsobj=d,simd=DT.sim)  
-
+  
   
   return(y)
 }  
-#' import(gsDesign)
-#' import(data.table)

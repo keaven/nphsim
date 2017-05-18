@@ -13,16 +13,17 @@
 #' @param v height of graph area and the summary area below.
 #' @examples
 #' # TBD
-#'
 #' @export
-plot.sim<-function(d
+#' @import ggplot2
+#' @import grid
+plotsim<-function(d
                   ,y
                   ,dg=NULL
                   ,yt="Y Axis Title"
                   ,logs=NULL
                   ,b=NULL
                   ,v=c(2,0.5) 
-                  ,...) 
+                  ) 
 {
   a=copy(d)
   a[,x:=factor(analysis)]
@@ -73,7 +74,7 @@ plot.sim<-function(d
     labs(y = yt, x = "") +
     theme(panel.border = element_rect(fill = NA), legend.position="none")
 
-  if (!is.null(logs)) {
+  if (isTRUE(logs)) {
     g1<-g1+scale_y_log10()
   }
 
@@ -122,5 +123,4 @@ plot.sim<-function(d
 
   p<-mmplot(g1, data_table)
 }
-#'
-#' @import(ggplot2)
+
