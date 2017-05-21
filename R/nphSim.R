@@ -1,8 +1,14 @@
 #' Simulate a Clinical Trial with Piecewise Exponential Time-to-Event Outcomes
 #'
-#' Description text
+#' Simulate two-arm time-to-event data using the piecewise exponential distribution \code{rpwexp()}. 
+#' User can specify enrollment speed as well as drop out rate separately for each arm. Additionaly if user has created
+#' a gsSurv object from \code{\link[gsDesign:nSurv]{gsDesign}} it can be used as input to supply simulation parameters. The only
+#' censoring mechanism is from dropout of the study and no administrative censoring is implemented.
 #'
-#' Details text
+#' All the simulation parameters: sample size, hazard rate in each interval and the interval duration, 
+#' enrollment time period and enrollment speed, and the piecewise dropout rate for the same interval duration need to be provided 
+#' unless a gsSurv object is provided, in which case the individual parameter can be left as \code{NULL}. If not \code{NULL} the value will
+#' overwrite the corresponding value from the gsSurv object.  
 #'
 #' @param nsim Number of simulations
 #' @param lambdaC Hazard rate of control arm. Specify a vector for piecewise hazard with duration specified in "intervals"
@@ -15,11 +21,59 @@
 #' @param eta A vector for dropout rate per unit time for control arm
 #' @param etaE A vector for dropout rate per unit time for experiment arm
 #' @param d A gsSurv object as input. The other inputs overwrite the corresponding parameters if not NULL
+#' 
+#' @return The function return a list with the follow components
+#' \describe{
+#'  \item{nsim, lambdaC, lambdaE, ssC, ssE, intervals, gamma, R}{as Input} 
+#'  \item{etaC}{same as eta} 
+#'  \item{etaE}{as Input or equal to etaC if Input is NULL} 
+#'  \item{simd}{data table object that stores the simulated data
+#'    \itemize{
+#'    \item{sim: simulation sequence number}
+#'    \item{treatment: "control" or "experiment"}
+#'    \item{enterT: calendar time a subject enters the study}
+#'    \item{survival: simulated time-to-event value}
+#'    \item{cnsr: censoring status. 1 = censored, 0 = event}
+#'    }
+#'  } 
+#'  }
+#' 
+#' 
 #' @examples
-#' # TBD
+#' # Simulate a two-arm study with overall survival endpint using proportional harzard of 0.7 and median survival of 6 months. 
+#' # The number of subjects in each arm is 300.
+#' library(survival)
+#' medC = 6 
+#' hr <- 0.7
+#' intervals <- NULL 
+#' gamma <- c(2.5, 5,  7.5,  10) ## a ramp-up enrollment
+#' R     <- c(2  , 2,  2  ,  6 ) ## enrollment period: total of 12 months
+#' eta <- -log(0.99) ## 1% monthly dropout rate
+
+#' sim1<-nphsim(nsim=1000,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
+#' km<-survfit(Surv(survival,1-cnsr)~treatment,data=sim1$simd[sim==1])
+#' plot(km,xlab="Month Since Randomization",ylab="Survival",lty=1:2,xlim=c(0,36),mark.time=TRUE)
+#' ll <- gsub("x=","",names(km$strata))  ## legend labels
+#' legend("top",legend=ll,lty=1:2,horiz=FALSE,bty='n')
+#'  
+#' 
+#' # Simulate survival endpoint with delayed separation of KM curve: HR=1 for the first 3 months and 0.65 afterwards 
+#' hr <- c(1,0.65)
+#' intervals <- 3 
+#' sim2<-nphsim(nsim=1000,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
+#' km<-survfit(Surv(survival,1-cnsr)~treatment,data=sim1$simd[sim<=10])
+#' plot(km,xlab="Month Since Randomization",ylab="Survival",lty=1:2,xlim=c(0,36))
+#' ll <- gsub("x=","",names(km$strata))  ## legend labels
+#' legend("top",legend=ll,lty=1:2,horiz=FALSE,bty='n')
+#' 
+#' 
+#' # Use gsSurv as input
+#' library(gsDesign)
+#' gs <- gsSurv ( k = 3, test.type = 4, alpha = 0.025, beta = 0.05, timing = c( 0.5,0.75 ), sfu = sfHSD , sfupar = c( -4 ), sfl = sfHSD, sflpar = c( -12 ), lambdaC = log(2) / 6, hr = 0.65, hr0 = 1, eta = 0.01, gamma = c( 2.5,5,7.5,10 ), R = c( 2,2,2,6 ) , S = NULL , T = 15 , minfup = 3 , ratio = 1) 
+#' sim3 <- nphsim(nsim=1000,d=gs) 
+
 #' @export
-#' @import gsDesign
-#' @import data.table
+#' @import gsDesign data.table
 nphsim <- function(nsim = 100
                   ,lambdaC = NULL
                   ,lambdaE = NULL
@@ -68,9 +122,9 @@ nphsim <- function(nsim = 100
   tC <- rpwexp(ssC*nsim, rate = lambdaC, intervals = intervals)
   tE <- rpwexp(ssE*nsim, rate = lambdaE, intervals = intervals)
   ## adding LTFU
-  xC<-data.table::data.table(sim=c(1:nsim),t=tC,treatment='control')
+  xC<-data.table(sim=c(1:nsim),t=tC,treatment='control')
   xC[,ltfuT:=rpwexp(ssC*nsim, rate = etaC+1e-8, intervals = intervals)]
-  xE<-data.table::data.table(sim=c(1:nsim),t=tE,treatment='experiment')
+  xE<-data.table(sim=c(1:nsim),t=tE,treatment='experiment')
   xE[,ltfuT:=rpwexp(ssE*nsim, rate = etaE+1e-8, intervals = intervals)]
 
   x <- rbind(xC,xE)

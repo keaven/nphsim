@@ -10,6 +10,7 @@
 #' @param stra parameter description
 #' @examples
 #' # TBD
+#' @import survival
 #' @export
 test.lr<-function (surv,cnsr,trt,stra=NULL) {
   ## logrank test p-value
