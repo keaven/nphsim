@@ -17,8 +17,9 @@ Imports:
   ggplot2
 Suggests:
   knitr,
-  rmarkdown
-Depends:
+  rmarkdown,
+  testthat
+Depends: 
 VignetteBuilder:
   knitr
 RoxygenNote: 6.0.1
