@@ -16,8 +16,8 @@
 #' @param intervals Duration of period in which hazard is constant as specified in lambdaC. A vector with length(lambdaC)-1
 #' @param ssC Sample size of control arm
 #' @param ssE Sample size of experiment arm
-#' @param gamma A vector of rate of enrollment in unit time
-#' @param R A vector of duration of time periods for recruitment with rate specified in gamma
+#' @param gamma A vector of rate of enrollment per unit of time
+#' @param R A vector of duration of time periods for recruitment with rates specified in gamma; should be same length as gamma
 #' @param eta A vector for dropout rate per unit time for control arm
 #' @param etaE A vector for dropout rate per unit time for experiment arm
 #' @param d A gsSurv object as input. The other inputs overwrite the corresponding parameters if not NULL
@@ -132,7 +132,9 @@ nphsim <- function(nsim = 100
   x[,cnsr1:=ifelse(t>ltfuT, 1, 0)]
 
   ## uniform enrollment in each intervals of R
-  x[,enterT:=sample(rpwexp(.N,rate=.N*gamma/sum(gamma*R),intervals=R[1:length(R)-1],
+  # x[,enterT:=sample(rpwexp(.N,rate=.N*gamma/sum(gamma*R),intervals=R[1:length(R)-1],
+  # next line is mod of above by KA for consideration
+  x[,enterT:=sample(rpwexp(.N,rate=gamma,intervals=R[1:length(R)-1],
                            cumulative=TRUE)),by=sim]
 
   ## ct: calendar time a subject had event/censoring
@@ -144,7 +146,7 @@ nphsim <- function(nsim = 100
   #x[,survival:= ifelse(ct>T, T-enterT, t1)]
   #x[,cnsr:=ifelse(ct>T, 1, cnsr1)]
   x[,survival:=t1][,cnsr:=cnsr1]
-  x[,c("cnsr1","t1","t","ltfuT","ct"):=NULL]  ## remove intermediate variables
+  x[,c("cnsr1","t1","t","ltfuT"):=NULL]  ## remove intermediate variables
   x[,treatment:=relevel(factor(treatment),ref='control')]  ## set control as reference level
 
   y<-list(nsim=nsim,

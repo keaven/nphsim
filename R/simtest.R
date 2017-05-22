@@ -17,7 +17,7 @@
 #' The boundaries are re-calculated if the number of events at an analysis is different from the design.
 #'
 #' @param x list genearted by simulation
-#' @param anaT A vector or matrix of alendar time for reporting, testing, and boundary crossing 
+#' @param anaT A vector or matrix of calendar time for reporting, testing, and boundary crossing 
 #' probability when a gsDesign object is specified.
 #' @param anaD A vector of number of events for reporting, testing, and boundary crossing 
 #' probability when a gsDesign object is specified.
@@ -140,10 +140,10 @@ simtest <- function(x
   if (anatype=='calendar'){
     ## use anaT for calendar based interim analyses
     sim=c(1:x$nsim)
-    if (is.vector(anaT)){ ## same analyais time for all simulations 
+    if (is.vector(anaT)){ ## same analysis time for all simulations 
       anaTDT<-data.table(sim,matrix(anaT,ncol=length(anaT)))
     }
-    if (is.matrix(anaT)){ ## various analysis time by each simulation 
+    if (is.matrix(anaT)){ ## vary analysis time for each simulation 
       anaTDT<-data.table(sim,anaT)
     }
     DT.t<-melt(anaTDT, id.vars=c("sim"))
