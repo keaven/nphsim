@@ -10,6 +10,7 @@
 #' @param d object of class 'gsDesign'
 #' @param b 1 for upper bound, 0 for lower bound
 #' 
+#' @keywords internal
 gsUpdate <- function(dth, d, b) {
   ##b=1 upper bound, b=0 lower bound
   dnew <-
@@ -33,6 +34,5 @@ gsUpdate <- function(dth, d, b) {
   }
   return(y)
 }
-#'
-#' @import(ggplot2)
+
 

@@ -12,8 +12,10 @@
 #' @examples
 #' # TBD
 #' @export
+#' @importFrom survMisc ten COV
+#' 
 wlr.Stat<-function (survival,cnsr,trt,stra=NULL,fparam) {
-  d<-data.table(survival=survival,cnsr=cnsr,trt=trt)
+  d<-data.table::data.table(survival=survival,cnsr=cnsr,trt=trt)
   x<-ten(survfit(Surv(survival, 1-cnsr) ~ trt,data=d))
   t1 <- x[e>0, t, by=t][, t]
   wt1 <- data.table::data.table(array(data=1, dim=c(length(t1),10)))
@@ -82,9 +84,4 @@ wlr.Stat<-function (survival,cnsr,trt,stra=NULL,fparam) {
 
   return(y)
 }
-#'
-#' @import(doParallel)
-#' @import(plyr)
-#' @import(reshape2)
-#' @import(survival)
-#' @import(survMisc)
+

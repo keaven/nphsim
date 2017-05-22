@@ -17,8 +17,9 @@
 #' @examples
 #' # examples here
 #'
-#' @export
-#' @return
+#' 
+#' @return A
+#' @keywords internal
 #' Needs update!
 simtestp <- function(x # list genearted by simulation
                     ,anaT=NULL # Calendar time for reporting, testing, and boundary crossing probability when a gsDesign object is specified.
