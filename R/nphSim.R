@@ -132,10 +132,9 @@ nphsim <- function(nsim = 100
   x[,cnsr1:=ifelse(t>ltfuT, 1, 0)]
 
   ## uniform enrollment in each intervals of R
-  # x[,enterT:=sample(rpwexp(.N,rate=.N*gamma/sum(gamma*R),intervals=R[1:length(R)-1],
+  x[,enterT:=sample(rpwexp(.N,rate=.N*gamma/sum(gamma*R),intervals=R[1:length(R)-1],cumulative=TRUE)),by=sim]
   # next line is mod of above by KA for consideration
-  x[,enterT:=sample(rpwexp(.N,rate=gamma,intervals=R[1:length(R)-1],
-                           cumulative=TRUE)),by=sim]
+  #x[,enterT:=sample(rpwexp(.N,rate=gamma,intervals=R[1:length(R)-1], cumulative=TRUE)),by=sim]
 
   ## ct: calendar time a subject had event/censoring
   x[,ct:=t1 + enterT]
