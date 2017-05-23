@@ -67,7 +67,7 @@
 #' # Use a gsSurv object as both input for simulation and testing. A logrank p-value and HR from cox model is reported.
 #' library(gsDesign)
 #' gs <- gsSurv ( k = 3, test.type = 4, alpha = 0.025, beta = 0.05, timing = c( 0.5,0.75 ), sfu = sfHSD , sfupar = c( -4 ), sfl = sfHSD, sflpar = c( -12 ), lambdaC = log(2) / 6, hr = 0.65, hr0 = 1, eta = 0.01, gamma = c( 2.5,5,7.5,10 ), R = c( 2,2,2,6 ) , S = NULL , T = 15 , minfup = 3 , ratio = 1) 
-#' sim1 <- nphsim(nsim=1000,d=gs)
+#' sim1 <- nphsim(nsim=10,d=gs)
 #' test1 <- simtest(x=sim1,anatype='event',method='LR', d=gs)
 #' test1$result
 #' plotsim(test1$result,y=c("hr"),dg=2,yt="Hazard Ratio",b=1,v=c(2,0.8))
@@ -78,7 +78,7 @@
 #' plotsim(test2$result,y=c("hr"),dg=2,yt="Hazard Ratio",b=1,v=c(2,0.8))
 #' 
 #' # specify by-simulation analysis time
-#' anaT<-matrix(c(9,11,15,10,12,16),byrow=TRUE,nrow=1000,ncol=3)
+#' anaT<-matrix(c(9,11,15,10,12,16),byrow=TRUE,nrow=00,ncol=3)
 #' test3 <- simtest(x=sim1,anatype='calendar',anaT=anaT, method='LR', d=gs)
 #' 
 #' 
@@ -155,7 +155,7 @@ simtest <- function(x
   } else if (anatype == 'event') {
     ## use anaD for event driven interim analyses
     dt <- data.table(x$simd,
-                     ct = x$simd$survival + x$simd$enterT,
+                     #ct = x$simd$survival + x$simd$enterT, # ct is added in nphsim returned value so this is not needed
                      k = 1)
     setorderv(dt, c("sim", "cnsr", "ct"), c(1, 1, 1))
     dt <- dt[, evn := c(1:(x$ssC + x$ssE))

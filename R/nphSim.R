@@ -24,7 +24,11 @@
 #' 
 #' @return The function return a list with the follow components
 #' \describe{
-#'  \item{nsim, lambdaC, lambdaE, ssC, ssE, intervals, gamma, R}{as Input} 
+#'  \item{nsim, lambdaC, lambdaE, ssC, ssE, intervals}{as Input} 
+#'  \item{gamma}{Actual enrollment rate per enrollment period. If the user provided an enrollment rate 
+#'  that matched the sample size given \code{R} this will be the same as the input \code{gamma} otherwise the actual enrollment rate will be
+#'  calculated using the same ratio as input.}
+#'  \item{R}{enrollment period: as Input}
 #'  \item{etaC}{same as eta} 
 #'  \item{etaE}{as Input or equal to etaC if Input is NULL} 
 #'  \item{simd}{data table object that stores the simulated data
@@ -32,6 +36,7 @@
 #'    \item{sim: simulation sequence number}
 #'    \item{treatment: "control" or "experiment"}
 #'    \item{enterT: calendar time a subject enters the study}
+#'    \item{ct: calendar time of event/censoring. Equals to \code{enterT + survival}}
 #'    \item{survival: simulated time-to-event value}
 #'    \item{cnsr: censoring status. 1 = censored, 0 = event}
 #'    }
@@ -50,7 +55,7 @@
 #' R     <- c(2  , 2,  2  ,  6 ) ## enrollment period: total of 12 months
 #' eta <- -log(0.99) ## 1% monthly dropout rate
 
-#' sim1<-nphsim(nsim=1000,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
+#' sim1<-nphsim(nsim=10,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
 #' km<-survfit(Surv(survival,1-cnsr)~treatment,data=sim1$simd[sim==1])
 #' plot(km,xlab="Month Since Randomization",ylab="Survival",lty=1:2,xlim=c(0,36),mark.time=TRUE)
 #' ll <- gsub("x=","",names(km$strata))  ## legend labels
@@ -60,7 +65,7 @@
 #' # Simulate survival endpoint with delayed separation of KM curve: HR=1 for the first 3 months and 0.65 afterwards 
 #' hr <- c(1,0.65)
 #' intervals <- 3 
-#' sim2<-nphsim(nsim=1000,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
+#' sim2<-nphsim(nsim=10,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
 #' km<-survfit(Surv(survival,1-cnsr)~treatment,data=sim1$simd[sim<=10])
 #' plot(km,xlab="Month Since Randomization",ylab="Survival",lty=1:2,xlim=c(0,36))
 #' ll <- gsub("x=","",names(km$strata))  ## legend labels
@@ -70,7 +75,7 @@
 #' # Use gsSurv as input
 #' library(gsDesign)
 #' gs <- gsSurv ( k = 3, test.type = 4, alpha = 0.025, beta = 0.05, timing = c( 0.5,0.75 ), sfu = sfHSD , sfupar = c( -4 ), sfl = sfHSD, sflpar = c( -12 ), lambdaC = log(2) / 6, hr = 0.65, hr0 = 1, eta = 0.01, gamma = c( 2.5,5,7.5,10 ), R = c( 2,2,2,6 ) , S = NULL , T = 15 , minfup = 3 , ratio = 1) 
-#' sim3 <- nphsim(nsim=1000,d=gs) 
+#' sim3 <- nphsim(nsim=10,d=gs) 
 
 #' @export
 #' @import gsDesign data.table
@@ -132,10 +137,12 @@ nphsim <- function(nsim = 100
   x[,cnsr1:=ifelse(t>ltfuT, 1, 0)]
 
   ## uniform enrollment in each intervals of R
-  # x[,enterT:=sample(rpwexp(.N,rate=.N*gamma/sum(gamma*R),intervals=R[1:length(R)-1],
+  aR <- R # keep actual enrollment period the same as input R
+  agamma <- (ssC+ssE)*gamma/sum(gamma*R)  # Actual enrollment rate
+  
+  x[,enterT:=sample(rpwexp(.N,rate=.N*gamma/sum(gamma*R),intervals=R[1:length(R)-1],cumulative=TRUE)),by=sim]
   # next line is mod of above by KA for consideration
-  x[,enterT:=sample(rpwexp(.N,rate=gamma,intervals=R[1:length(R)-1],
-                           cumulative=TRUE)),by=sim]
+  #x[,enterT:=sample(rpwexp(.N,rate=gamma,intervals=R[1:length(R)-1], cumulative=TRUE)),by=sim]
 
   ## ct: calendar time a subject had event/censoring
   x[,ct:=t1 + enterT]
@@ -155,8 +162,8 @@ nphsim <- function(nsim = 100
           ssC=ssC,
           ssE=ssE,
           intervals=intervals,
-          gamma=gamma,
-          R=R,
+          gamma=agamma,
+          R=aR,
           etaC=etaC,
           etaE=etaE,
           simd=x)
