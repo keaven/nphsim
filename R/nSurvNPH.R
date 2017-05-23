@@ -15,7 +15,7 @@
 #' in like form as eta; if NULL, this is set equal to eta
 #' @param NONCMPL TBD
 #' @param DROPIN TBD
-#' @param gamma NONCMPL a scalar, vector or matrix of rates of entry by time period (rows) 
+#' @param gamma a scalar, vector or matrix of rates of entry by time period (rows) 
 #' and strata (columns); if entered as a scalar, rate is constant accross strata 
 #' and time periods; if entered as a vector, rates are constant accross strata
 #' @param R a scalar or vector of durations of time periods for recruitment rates 
