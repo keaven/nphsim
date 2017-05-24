@@ -15,7 +15,7 @@
 #' in like form as eta; if NULL, this is set equal to eta
 #' @param NONCMPL TBD
 #' @param DROPIN TBD
-#' @param gamma NONCMPL a scalar, vector or matrix of rates of entry by time period (rows) 
+#' @param gamma a scalar, vector or matrix of rates of entry by time period (rows) 
 #' and strata (columns); if entered as a scalar, rate is constant accross strata 
 #' and time periods; if entered as a vector, rates are constant accross strata
 #' @param R a scalar or vector of durations of time periods for recruitment rates 
@@ -38,7 +38,8 @@
 #' @param sided 1 for 1-sided testing, 2 for 2-sided testing
 #' @param tol or cases when T or minfup values are derived through root finding (T or minfup input as NULL), 
 #' tol provides the level of error input to the uniroot() root-finding function. The default is the same as for uniroot.
-#' @param SBDV TBD
+#' @param SBDV This is a tuning parameter for the Lakatos method specifying how many intervals to use for
+#' the Markov approximation applied in the method
 #' @param SIMULT TBD
 #' @param TRT_LAG lag treatment
 #' @param nstrata TBD
