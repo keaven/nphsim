@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Keaven Anderson and Yang Wang" />
+
+<meta name="date" content="2017-05-24" />
+
+<title>Basic Simulation with the nphsim R Package</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Basic Simulation with the nphsim R Package</h1>
+<h4 class="author"><em>Keaven Anderson and Yang Wang</em></h4>
+<h4 class="date"><em>2017-05-24</em></h4>
+
+
+
+<p>We demonstrate the basic simulation capabilities for time-to-event clinical trials that are implemented in the <code>nphsim</code> package. This includes:</p>
+<ul>
+<li>Simulating enrollment with piecewise constant enrollment rates</li>
+<li>Simulating times-to-events with a piecewise exponential distribution</li>
+<li>Simulating a clinical trial (fixed design) by combining the above capabilities</li>
+<li>Performing various statistical tests on a simulated clinical trial</li>
+<li>Approximating power with simulation for a group sequential derived using the <code>gsDesign</code> package</li>
+</ul>
+<div id="simulating-enrollment" class="section level2">
+<h2>Simulating Enrollment</h2>
+<p>We use piecewise constant enrollment and piecewise exponential failure rates as methods to approximate arbitrary patterns of enrollment and dropouts. We specify an example non-proportional hazards scenario.</p>
+<p>We approximate an arbitrary enrollment pattern by assuming constant enrollment rates within fixed time periods. The length of enrollment periods prior to the final stable enrollment (2, 4, respectively) are specified here:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">enrollIntervals &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">4</span>)</code></pre></div>
+<p>Thus, we assume enrollment is constant in months 1-2, 3-6, and from month 7 onward. Next we specify relative rates of enrollment in these time periods:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">enrollRates &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>)</code></pre></div>
+<p>Let’s say we wish to enroll 200 patients, starting with 10 patients per month. We generate random enrollment times as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(nphsim)
+enrollTimes &lt;-<span class="st"> </span><span class="kw">rpwexp</span>(<span class="dt">n =</span> <span class="dv">300</span>, <span class="dt">rate =</span> <span class="dv">10</span> *<span class="st"> </span>enrollRates, <span class="dt">intervals =</span> enrollIntervals, <span class="dt">cumulative =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<p>When ’cumulative = TRUE<code>is input to</code>rpwexp<code>, it is designed to simulate enrollment with rates specified in</code>rate`. We plot the enrollment over time:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
+<span class="kw">qplot</span>(<span class="dt">x =</span> <span class="kw">c</span>(<span class="dv">0</span>, enrollTimes), <span class="dt">y =</span> <span class="dv">0</span>:<span class="kw">length</span>(enrollTimes), <span class="dt">geom=</span><span class="st">&quot;step&quot;</span>, 
+      <span class="dt">ylab=</span><span class="st">&quot;Number enrolled&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;Time&quot;</span>) +
+<span class="st">      </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">2</span>,<span class="dv">6</span>,<span class="dv">10</span>))</code></pre></div>
+<div class="figure">
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAAolBMVEUAAAAAADoAAGYAOpAAZrYzMzM6AAA6ADo6AGY6kNtNTU1NTW5NTY5NbqtNjshmAABmADpmtv9uTU1uTW5uTY5ubqtuq+SOTU2OTW6OTY6ObquOyP+QOgCQtpCQ2/+rbk2rjk2ryKur5P+2ZgC2///Ijk3I///bkDrb/7bb///kq27k///r6+v/tmb/yI7/25D/5Kv//7b//8j//9v//+T///8Hw8aeAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAJQklEQVR4nO2dfWPTNhDGNWBlGFjXssG2dGNraTNKX9IWf/+vtthJEzuW7h7Zku2T7vmDFOci2b/oLZLuZEoVKTP1DcxdCoiRAmKkgBgpIEYKiFFPQDc7Nf70u2QTZhbSynmzCshtpoAYMwXEmCkgxkwBMWYKiDFTQIwZDOiuKN5dleXjp+L9t92LAtpp9etVef1z+f3zovGigDqQHv+4arwooLbWZWb127fy8ffz7cv62o9r0Z+Sqy4OEtDq9O15efe+JrN92b7DfwOhvs7IVgdmZncJAlQ2is6+BKULyBhvQOXlIqM2yDQuAYC2ler754+bXuxj8r2YJ6DyuijWbVA+4yDjC4gQeR9CAT3zUUB2sx0fBWQxM2bPRwF1zRp0bhRQx8y0+SigQzPTvaSAmmYKiDYzCog06/BRQG2zDh8F1NRhD7b7pALayLhuVgFtpIBoGQVEyzhvVgHVUkCkqi5MAREydjMF9CwFRMsoIFKNRTDLJxXQdpZDAblkFBCt5iKY5ZPZAzIKiHrTtFcJLZ/MHRBlpoBuDlcJLZ/MGlBzFlEBWdScZY0ESLLWDbSPdb9M+G+gz5c+TgmyrDNbPpkvINtCvOWT2QI6XOZRQAeyrjNbLikgt1nWgOw7FSyXMgXk2KlguZQnINdCvOVSpoAgs2wB2XZyKKC9bHgUUENWPgpoLwVEW9lrmALayc5HAe2kgGgrRw1TQFu5+OCAHo7Ns158SRCQR2LuErSs0Dwcn6RXgpwFyAvQFs1tgiXIyUcBbRQG0HMVe8PyEQbI+ivVnRjRi91WbTTQBMkCRODRbv6G4aOAqPbHkRgBaLmuYMuXX5MCRBcgP0AXL/87Pnk6e5USIIaPbzdf9fRpdfMMn+wBcQXIcxxUVbGkxkEsnz7jIICPHEB9EoO7+dVpUSzkxg8yhhpBE4mhgKqIZasP52LjKPJwHInZAXXng+4qHIJjmAUG5CxFUuMoeu1EJJIh360iuwmNowg0P67E0CpWtcsfy24kThGArP7eYGIevdiioiSyDbJ664KJoYA2fEqZcRQjAVo2B4rXRaWFyHGQ3d8bTIz4qZHKlGvVQkcAlMykvcudGUwsA0DDsky+ijn9vcHE0EZaKiC3OzOYmM9PDZGAhmbpBPR0hiyJzR0Q4c4MJsY10rIBUe7MYGJEI42s+Mwd0PAsiRKUwP6gmIA8xGfg8Uy+Zgqot1VzFjoGoPsj4VWM8fcGEyO6eWDRec6ATGRA0rt5S+D1XomlOlDk/b3BxNxtEPI7fsaAQmWZ6DgIcIgHE0u0mwfcmcHE0gSE+HuDiRGABG/BQ/y9wcTcgORuwbPs44gzDhK6wwx0ZwazTA+QdR0+RhWTugUP9fcGzYhGWugWvPEAweIzCHW3gBUcMQA0Sw0Q7u8NmiUHaEhaCqhHliEAzUiB9iI6k2/8LXM+yMPfGzSjBoryAPk4xINm1EBR3sKhj783aEaUIHkTZl4O8aBZSr2YnzszaJYQIGq3eBRA0ibMPP29QTM3IGkTZr4O8aAZ1c2Lmg/ydogHzdIBFCCtlCfM/B3iQTOikRY1YebvEA+apdLNKyDGagpAksLj9Ig5AZoRjbQkV4QeIRVAM6qbr4uRjG5eAZFWfMyAGFXsVk6YwF4hFUAzOyBhgSbHB+QnPoNQd+uwUkCM1TSA5Gwk7xfWBTRzAhK0kRyIOxGvmxcACAnMEaUEiQEULK0e4yABgKDILhk30ljkmyhVDJkrmxoQEphsWJbCG2k0bEm2jfSEgMr7n+bfSMOBb6JUscMfq3XIqVnFD8ID34zxW+yueHdVziqOokfgmxEAXb79d12C5hTDzCeuy2hVbD5xFP0OaQ6VaefKwy9/7/6uAM0njqJfVI54Vex2v//FWoKmAdSIGTA5oHYVm0kbZCCrIFlygC7aJWgmcRTnAGjbSP/QboPmMA5qR4aeugQh4jMIdbeVeoUMyAhQP4/40IDmuy7W0+E7Wgm6QHZQ8RmEulvsgG8wLcyMBPRw3Gij5wAIO+AbSws0owDdGsxdg88gzN2i51cjacFmBKALA66M8RkEudsh3qgRAD2dQbvLRgPkmn2eCtD9EbzqMwqggZ5gwQEt0eo1DiBi8ULHQZUG+/EkPpIe7uiUNCB6cVABBfHCSBYQf+hV3oCC7R1LFlCvZ+ptJQ0QtHUjX0DgzpY8AdVD1JCPnhwg/KFyBGTCr7qnBGjX9igguzzj0GcHyDdQf2aAmn27ArLIP1C/AvJ/pt5W8wfU46iHrAD1OepBAqAwMpPsOvTTlCUo7qq79CpmnThUQDvFX1SWDWiERWXRgFwTYwqoErFsoYCYaVUFFCS0X8qARlwzFQlozDVTmYCCPFS6gAJFjUoYUJiHShYQv26aMyB+Vwv8UIkCCvdQ6QEyUPGBHyo1QAYOlpAlIOMRCyA7QPuqpYC6eRr/JdN8AHVaZQXUkK3LUkB7WTfSKaBnOfp0BVTLOPt0BdRsehSQBRDTpysgZhNL9oC4XT4KCMkz1EMJBMQOm3MA5I4fdDhyzhMQEUcRiM6SASBnDLPuL688AbniKM5/l+EwwY83gziKMaxilCAFZNXUcRQjWYXsxaaNoxjJapRxEJpnr7uNbDX6hBl+CbzbyFYKqIeZAmLMFBBjFgLQXlhw8qAhzEdNTAEx7ysg5n0FxLyf+G/x4VJAjBQQIwXESAExGgao9QvfqdVpUSwG5dPQ98/F23PeDFLz0AeXBgFqr3S4VM1Drj6EeqjLRT37G0LNw6+cGgSoPcvovI8q+8tARajKMpBah185rQYBas9TU8KsoCz/CVvFuGcYBKi90kGomq8No9Xpon6mMIntD79y2oxSgh4/heLjUWiRxGKXIKwNqr/1UHr8MzCgqG1Qe6XDeRsB+dStfdAqxj3DCOOg66JSKEjrLN+F6siij4NykAJipIAYKSBGCoiRAmKkgBgpIEbzBPR0tj1m6NX9a+TAvIiaJ6BKk6PZSAExmjug9b/3r/86MubN/fqfk03tww+KGy4JgI5efi2X1emUyxdfns5eleUSO6kyiEQAOqnOFzyp/1MfZf5wjJ7FOFwSAFV/PP+z3PRuwFm5gSQO0Ii1q5Y0QLfQQcIBJQ3Q09m6CI1JSRqgupsfsxTNF9BMpIAYKSBGCoiRAmKkgBgpIEb/AwxxWZ9aTmvVAAAAAElFTkSuQmCC" alt="Plot of simulated enrollment." />
+<p class="caption">Plot of simulated enrollment.</p>
+</div>
+<p>You can see the enrollment rate increases from the first 2 months to months 3-6 and again in the period after month 6. The last patient in this simulation is enrolled at <code>max(enrollTimes) =</code> 10.7 months.</p>
+</div>
+<div id="generating-piecewise-exponential-failure-times" class="section level2">
+<h2>Generating Piecewise Exponential Failure Times</h2>
+<p>We can also use the <code>rpwexp</code> function to generate piecewise exponential failure times. We have a different set of intervals to define the periods of time for which different failure rates apply:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Failure rates for piecewise exponential time periods</span>
+failRates &lt;-<span class="st"> </span><span class="kw">c</span>(.<span class="dv">8</span>, .<span class="dv">4</span>, .<span class="dv">2</span>, .<span class="dv">1</span>)
+<span class="co"># Interval durations before final stable rate</span>
+<span class="co"># Note that length is 1 fewer than for failRates</span>
+failIntervals &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">6</span>)</code></pre></div>
+<p>Now we generate the piecewise exponential failure times corresponding to the patient enrollment previously simulated, again using <code>rpwexp</code>. We do not need to specify the default value <code>cumulative = FALSE</code> which distinguishes this from the call generating enrollment times.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">n &lt;-<span class="st"> </span><span class="kw">length</span>(enrollTimes)
+y &lt;-<span class="st"> </span><span class="kw">rpwexp</span>(<span class="dt">n =</span> n, <span class="dt">rate =</span> failRates, <span class="dt">intervals =</span> failIntervals)</code></pre></div>
+<p>The longest duration among these is <code>max(y) =</code> 34.8683361. Although we will eventually be interested in generating censored survival times, this is not done here; there is a value for event time each simulated patient. We plot the duration of time until an event for all patients ordered by decreasing time which reproduces the shape of the Kaplan-Meier curve for the points; the <code>theme</code> function removes the y-axis as well as its labels and tick-marks. Note that at random there are some patients with very long simulated times.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">id &lt;-<span class="st"> </span><span class="dv">1</span>:n
+<span class="co"># sort patient time-to-event and create a 0 starting point for each patient</span>
+dta &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">N=</span><span class="kw">factor</span>(<span class="kw">c</span>(id,id)),<span class="dt">Time=</span><span class="kw">c</span>(<span class="kw">array</span>(<span class="dv">0</span>,n), <span class="kw">sort</span>(y, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>)))
+<span class="kw">ggplot</span>(dta, <span class="kw">aes</span>(<span class="dt">x =</span> Time, <span class="dt">y =</span> N, <span class="dt">grp =</span> N)) +<span class="st"> </span><span class="kw">geom_line</span>() +
+<span class="st">       </span><span class="kw">xlab</span>(<span class="st">&quot;Time-to-event&quot;</span>) +<span class="st"> </span><span class="kw">ylab</span>(<span class="st">&quot;Patients ordered by time-to-event&quot;</span>) +
+<span class="st">  </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks=</span>(<span class="dv">0</span>:<span class="dv">4</span>)*<span class="dv">6</span>) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.text.y=</span><span class="kw">element_blank</span>(),<span class="dt">axis.ticks.y=</span><span class="kw">element_blank</span>())</code></pre></div>
+<div class="figure">
+<img src="data:image/png;base64,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" alt="Plot of sorted simulated failure times without censoring." />
+<p class="caption">Plot of sorted simulated failure times without censoring.</p>
+</div>
+</div>
+<div id="simulating-a-2-arm-trial-instance-with-non-proportional-hazards" class="section level1">
+<h1>Simulating a 2-Arm Trial Instance with Non-Proportional Hazards</h1>
+<p>We now proceed to simulating a clinical trial with the control group rate specified above and with an experimental group having piecewise exponential rates generated according to a non-proportional hazards assumption. The parameters here appear somewhat different than above in <code>rpwexp</code> examples as they follow variable names used in the <code>gsDesign</code> R package. [SHOULD WE CHANGE THIS???]</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Hazard ratio corresponding to control group event rates above</span>
+<span class="co"># and corresponding failure rates for experimental group</span>
+hr &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, .<span class="dv">7</span>, .<span class="dv">5</span>, .<span class="dv">3</span>)
+lambdaE &lt;-<span class="st"> </span>hr *<span class="st"> </span>failRates
+<span class="co"># Sample size of control and experimental arms</span>
+ssC &lt;-<span class="st"> </span>n
+ssE &lt;-<span class="st"> </span>n
+<span class="co"># We assume dropouts at a rate of .05, increasing to .1 at end</span>
+<span class="co"># dropout rates specified for same intervals as failure rates</span>
+eta &lt;-<span class="st"> </span><span class="kw">c</span>(.<span class="dv">1</span>,.<span class="dv">1</span>,.<span class="dv">1</span>,.<span class="dv">3</span>)
+<span class="co"># Simulate a single trial instance</span>
+<span class="co"># We add an arbitrary enrollment interval for indefinite enrollment duration</span>
+trial &lt;-<span class="st"> </span><span class="kw">nphsim</span>(<span class="dt">nsim =</span> <span class="dv">1</span>, <span class="dt">lambdaC =</span> failRates, <span class="dt">lambdaE =</span> lambdaE,
+                <span class="dt">intervals =</span> failIntervals, <span class="dt">ssC =</span> ssC, <span class="dt">ssE =</span> ssE,
+                <span class="dt">gamma =</span> <span class="dv">2</span> *<span class="st"> </span>enrollRates, <span class="dt">R =</span> <span class="kw">c</span>(enrollIntervals, <span class="dv">1000</span>),
+                <span class="dt">eta =</span> eta, <span class="dt">etaE =</span> eta)
+<span class="co"># show a few lines</span>
+<span class="kw">head</span>(trial$simd, <span class="dt">n=</span><span class="dv">5</span>)</code></pre></div>
+<pre><code>##    sim treatment   enterT       ct  survival cnsr
+## 1:   1   control 398.0850 400.2415 2.1564492    1
+## 2:   1   control 274.3507 277.4301 3.0793768    0
+## 3:   1   control 558.2783 560.0008 1.7224411    0
+## 4:   1   control 246.5197 248.7585 2.2387889    1
+## 5:   1   control 517.8333 518.5022 0.6688888    0</code></pre>
+<p>In the above, we see the simulation ID in <code>sim</code>, treatment group in <code>treatment</code>, time of study entry in <code>enterT</code>, duration followed for survival in <code>survival</code> and censoring value (0 = event, 1 = censored) in <code>cnsr</code>. We examine censoring by treatment group:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(trial$simd$treatment, trial$simd$cnsr)</code></pre></div>
+<pre><code>##             
+##                0   1
+##   control    225  75
+##   experiment 182 118</code></pre>
+<p>Summarizing times of events relative to start of enrollment, we have</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(trial$simd$enterT+trial$simd$survival)</code></pre></div>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+##    0.3021  255.5000  519.1000  515.0000  772.3000 1022.0000</code></pre>
+<p>We compare the distributions of times to events by computing Kaplan-Meier curves. The curves appear to separate more as time goes on and the hazard ratio becomes more extreme.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(survival)
+<span class="kw">plot</span>(<span class="kw">with</span>(trial$simd, <span class="kw">survfit</span>(<span class="kw">Surv</span>(survival, <span class="dv">1</span>-<span class="st"> </span>cnsr) ~<span class="st"> </span>treatment)))</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="performing-an-analysis" class="section level1">
+<h1>Performing an analysis</h1>
+<p>Now suppose we wish to test after 300 events (NOT YET WORKING).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">testOut &lt;-<span class="st"> </span><span class="kw">simtest</span>(<span class="dt">x =</span> trial, <span class="dt">anaD=</span><span class="dv">300</span>)
+testOut$result</code></pre></div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
