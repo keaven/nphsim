@@ -20,7 +20,7 @@
 #'   
 #' @examples
 #' # RMST on the simulated data
-#' library(survival)
+#' library(survRM2)
 #' medC = 6 
 #' hr <- 0.7
 #' intervals <- NULL 
