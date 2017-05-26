@@ -10,24 +10,41 @@
 #' Input: dataframe 'indata' contains the following variables:
 #' Event.T -> Event time (failure/censor); Status -> 0 = Censored, 1 = Event of Interest; 
 #' Z -> 0 = Control, 1 = Active
-#' @param survival parameter description
-#' @param cnsr parameter description
-#' @param trt  parameter description
-#' @param stra parameter description
-#' @param fparam parameter description
-#' @return
-#' Code returns the Z statistic and p-value.
+#' @param survival time-to-event variable
+#' @param cnsr censoring variable: 1=censoring, 0=event
+#' @param trt  treatment varaible. Accepted values are either "experiment" or "control"
+#' @param stra stratification variable. Default is \code{NULL} (currently not implemented)
+#' @param fparam parameter description. Set to \code{NULL} (currently not used)
+#' @return Code returns the Z statistic and p-value.
+#' \describe{
+#'  \item{pval}{One-sided p-Value from weighted Kaplan-Meier test} 
+#'  \item{z}{test statistics}
+#'  \item{Df}{degree of freedom. Currently always set to \code{NA}}
+#'  }
 #' @examples
-#' # TBD
+#' # weighted Kaplan-Meier test on the simulated data
+#' library(survival)
+#' medC = 6 
+#' hr <- c(1, 0.6)
+#' intervals <- 3 
+#' gamma <- c(2.5, 5,  7.5,  10) ## a ramp-up enrollment
+#' R     <- c(2  , 2,  2  ,  6 ) ## enrollment period: total of 12 months
+#' eta <- -log(0.99) ## 1% monthly dropout rate
+#' sim1 <- nphsim(nsim=1,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
+#' test1 <- simtest(x=sim1, anaD=c(250,300), method=wkm.Stat)
+#' test1$result[]
+#' 
+#' # direct function call (without cutoff)
+#' wkm.Stat(surv=sim1$simd$survival, cnsr=sim1$simd$cnsr, trt=sim1$simd$treatment)
 #' @export
-WKM.Stat <- function(survival,cnsr,trt,stra=NULL,fparam=NULL){
+#' @import survival
+wkm.Stat <- function(survival,cnsr,trt,stra=NULL,fparam=NULL){
   indata<-data.table(Event.T=survival,Status=1-cnsr,Z=(trt=='experiment'))
   data.g1 <- indata[Z==1, ]
   data.g2 <- indata[Z==0, ]
   n1 <- data.g1[,.N]
   n2 <- data.g2[,.N]
   n <- n1 + n2
-  
   
   ## Generate a survfit object based on the failure times for each group
   
@@ -157,9 +174,8 @@ WKM.Stat <- function(survival,cnsr,trt,stra=NULL,fparam=NULL){
   stat <- num / denominator
   
   return(list(
-    Stat = stat,
-    Df = NA,
-    pval = (1 - pnorm(stat))
+    pval = 1-pnorm(stat),
+    z = stat,
+    Df = NA
   ))
 }
-#' import(survival)
