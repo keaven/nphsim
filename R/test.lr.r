@@ -7,7 +7,7 @@
 #'
 #' @param survival time-to-event variable
 #' @param cnsr censoring variable: 1=censoring, 0=event
-#' @param trt  treatment varaible
+#' @param trt  treatment varaible. Accepted values are either "experiment" or "control"
 #' @param stra stratification variable. Default is \code{NULL}
 #' @return The function return a list with the follow components
 #' \describe{

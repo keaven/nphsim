@@ -6,8 +6,8 @@
 #'
 #' @param survival time-to-event variable
 #' @param cnsr censoring variable: 1=censoring, 0=event
-#' @param trt  treatment varaible
-#' @param stra stratification variable. Default is \code{NULL}
+#' @param trt  treatment varaible. Accepted values are either "experiment" or "control"
+#' @param stra stratification variable. Default is \code{NULL} (currently not implemented)
 #' @param fparam the cutoff time for RMST analysis. If larger than the minimum of the largest observed time 
 #' on each of the two arms, the minimum value will be used.
 #' @return The function return a list with the follow components
@@ -47,7 +47,7 @@ rmst.Stat <- function(survival, cnsr, trt, stra = NULL, fparam = NULL) {
   tau <- ifelse(tau_max < fparam, tau_max, fparam)
   a <- rmst2(time = survival, status = 1 - cnsr, arm = (trt == "experiment"), tau = tau)
   b <- a$unadjusted.result
-  pval <- ifelse(sign(b[1, 1]), b[1, 4]/2, (1 - b[1, 4])/2)
+  pval <- ifelse(sign(b[1, 1]), b[1, 4]/2, 1 - b[1, 4]/2)
   y <- list(pval = pval, tau = tau, est = b[1, 1], estlb = b[1, 2], estub = b[1, 3])
   return(y)
 }

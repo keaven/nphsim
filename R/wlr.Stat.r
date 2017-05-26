@@ -19,8 +19,8 @@
 #'
 #' @param survival time-to-event variable
 #' @param cnsr censoring variable: 1=censoring, 0=event
-#' @param trt  treatment varaible
-#' @param stra stratification variable. Default is \code{NULL}
+#' @param trt  treatment varaible. Accepted values are either "experiment" or "control"
+#' @param stra stratification variable. Default is \code{NULL} (currently not implemented)
 #' @param fparam a list input to request additional FH test and time of delayed separation in the simplified APPLE method
 #' \describe{
 #'  \item{\code{fparam$FH(rho, gamma)}}{request FH p-Value with rho and gamma (e.g. rho=0 and gamma=0 is logrank test)} 
@@ -104,7 +104,7 @@ wlr.Stat <- function(survival, cnsr, trt, stra = NULL, fparam) {
   res1[, `:=`("chiSq", Q^2/Var)]
   res1[, `:=`("df", 1)]
   res1[, `:=`("pChisq", 1 - stats::pchisq(chiSq, df))]
-  res1[, `:=`("onesidedp", ifelse(Z < 0, pNorm/2, (1 - pNorm)/2))]
+  res1[, `:=`("onesidedp", ifelse(Z < 0, pNorm/2, (1 - pNorm/2)))]
   
   pvals <- transpose(res1[, .(onesidedp)])
   setnames(pvals, paste0("pval_", n1))
