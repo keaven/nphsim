@@ -140,7 +140,7 @@ nphsim <- function(nsim = 100
   aR <- R # keep actual enrollment period the same as input R
   agamma <- (ssC+ssE)*gamma/sum(gamma*R)  # Actual enrollment rate
   
-  x[,enterT:=sample(rpwexp(.N,rate=.N*gamma/sum(gamma*R),intervals=R[1:length(R)-1],cumulative=TRUE)),by=sim]
+  x[,enterT:=sample(rpwexp(.N,rate=.N*gamma/sum(gamma*R),intervals=R[1:length(gamma)-1],cumulative=TRUE)),by=sim]
   # next line is mod of above by KA for consideration
   #x[,enterT:=sample(rpwexp(.N,rate=gamma,intervals=R[1:length(R)-1], cumulative=TRUE)),by=sim]
 

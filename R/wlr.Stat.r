@@ -75,7 +75,7 @@ wlr.Stat <- function(survival, cnsr, trt, stra = NULL, fparam) {
   S3 <- c(1, S3[seq.int(length(S3) - 1L)])
   wt1[, `:=`(FH01, (1 - S3))][, `:=`(FH10, S3)][, `:=`(FH11, S3 * (1 - S3))][, `:=`(FH, S3^fparam$FH[1] * ((1 - S3)^fparam$FH[2]))]  ## FH p, q
   
-  ## simplified APPLE, w1=0 and w2=1, separate at delayd separation point
+  ## simplified APPLE, w1=0 and w2=1, separate at delayed separation point
   data.table::set(wt1, j = "APPLE", value = x[e > 0, ifelse(t < fparam$APPLE, 0, 1), by = t][, V1])
   
   n2 <- c("W", "Q", "Var", "Z", "pNorm", "chiSq", "df", "pChisq")
