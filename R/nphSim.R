@@ -29,6 +29,8 @@
 #'  that matched the sample size given \code{R} this will be the same as the input \code{gamma} otherwise the actual enrollment rate will be
 #'  calculated using the same ratio as input.}
 #'  \item{R}{enrollment period: as Input}
+#'  \item{gammaadj}{if \code{TRUE} the enrollment period \code{R} is fixed and enrollment rate is adjusted proportionally to meet the sample size; 
+#'  otherwise the last interval of R is adjusted to meet the sample size without adjustment to the enrollment rate.}
 #'  \item{etaC}{same as eta} 
 #'  \item{etaE}{as Input or equal to etaC if Input is NULL} 
 #'  \item{simd}{data table object that stores the simulated data
@@ -87,6 +89,7 @@ nphsim <- function(nsim = 100
                   ,ssE = NULL
                   ,gamma = NULL
                   ,R = NULL
+                  ,gammaadj = TRUE
                   ,eta = NULL
                   ,etaE = NULL
                   ,d = NULL
@@ -137,21 +140,24 @@ nphsim <- function(nsim = 100
   x[,cnsr1:=ifelse(t>ltfuT, 1, 0)]
 
   ## uniform enrollment in each intervals of R
-  aR <- R # keep actual enrollment period the same as input R
-  agamma <- (ssC+ssE)*gamma/sum(gamma*R)  # Actual enrollment rate
+  if (isTRUE(gammaadj)){ # adjust enrollment rate while keeping R fixed
+    aR <- R # keep actual enrollment period the same as input R
+    agamma <- (ssC+ssE)*gamma/sum(gamma*R)  # Actual enrollment rate
+    x[,enterT:=sample(rpwexp(.N,rate=.N*gamma/sum(gamma*R),intervals=R[1:length(gamma)-1],cumulative=TRUE)),by=sim]
+  } else{ # adjust the last interval of R while keeping enrollment rate fixed
+    agamma <- gamma
+    aR <- R
+    if ((ssC+ssE)-sum(gamma[1:length(gamma)-1]*R[1:length(gamma)-1])<=0) {
+      stop ("User requested to keep the enrollment rate fixed but the total enrollment is already greater than the specified sample size prior to the last interval of R.")
+    } else{
+      aR[length(gamma)] <- ((ssC+ssE)-sum(gamma[1:length(gamma)-1]*R[1:length(gamma)-1]))/gamma[length(gamma)]
+      x[,enterT:=sample(rpwexp(.N,rate=gamma,intervals=R[1:length(gamma)-1],cumulative=TRUE)),by=sim] 
+    }
+  }
   
-  x[,enterT:=sample(rpwexp(.N,rate=.N*gamma/sum(gamma*R),intervals=R[1:length(gamma)-1],cumulative=TRUE)),by=sim]
-  # next line is mod of above by KA for consideration
-  #x[,enterT:=sample(rpwexp(.N,rate=gamma,intervals=R[1:length(R)-1], cumulative=TRUE)),by=sim]
 
   ## ct: calendar time a subject had event/censoring
   x[,ct:=t1 + enterT]
-  ## administrative censor at T
-  ## keep this checking for now and will remove eventually
-  # following 3 lines commented out by KA...will check w YW
-  #T <- 99999
-  #x[,survival:= ifelse(ct>T, T-enterT, t1)]
-  #x[,cnsr:=ifelse(ct>T, 1, cnsr1)]
   x[,survival:=t1][,cnsr:=cnsr1]
   x[,c("cnsr1","t1","t","ltfuT"):=NULL]  ## remove intermediate variables
   x[,treatment:=relevel(factor(treatment),ref='control')]  ## set control as reference level
