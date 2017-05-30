@@ -18,6 +18,8 @@
 #' @param ssE Sample size of experiment arm
 #' @param gamma A vector of rate of enrollment per unit of time
 #' @param R A vector of duration of time periods for recruitment with rates specified in gamma; should be same length as gamma
+#' @param fixEnrollTime if \code{TRUE} the enrollment period \code{R} is fixed and enrollment rate is adjusted proportionally to meet the sample size; 
+#'  otherwise the last interval of R is adjusted to meet the sample size without adjustment to the enrollment rate.
 #' @param eta A vector for dropout rate per unit time for control arm
 #' @param etaE A vector for dropout rate per unit time for experiment arm
 #' @param d A gsSurv object as input. The other inputs overwrite the corresponding parameters if not NULL
@@ -25,12 +27,9 @@
 #' @return The function return a list with the follow components
 #' \describe{
 #'  \item{nsim, lambdaC, lambdaE, ssC, ssE, intervals}{as Input} 
-#'  \item{gamma}{Actual enrollment rate per enrollment period. If the user provided an enrollment rate 
-#'  that matched the sample size given \code{R} this will be the same as the input \code{gamma} otherwise the actual enrollment rate will be
-#'  calculated using the same ratio as input.}
-#'  \item{R}{enrollment period: as Input}
-#'  \item{gammaadj}{if \code{TRUE} the enrollment period \code{R} is fixed and enrollment rate is adjusted proportionally to meet the sample size; 
-#'  otherwise the last interval of R is adjusted to meet the sample size without adjustment to the enrollment rate.}
+#'  \item{gamma}{actual enrollment rate per enrollment period. If \code{fixEnrollTime} is not \code{TRUE} this is the same as the input \code{gamma}}
+#'  \item{R}{actual enrollment period. If \code{fixEnrollTime} is \code{TRUE} this is the same as input \code{R}, otherwise
+#'  the last interval of the input \code{R} will be adjusted to meet the specified sample size while keeping \code{gamma} fixed.}
 #'  \item{etaC}{same as eta} 
 #'  \item{etaE}{as Input or equal to etaC if Input is NULL} 
 #'  \item{simd}{data table object that stores the simulated data
@@ -89,7 +88,7 @@ nphsim <- function(nsim = 100
                   ,ssE = NULL
                   ,gamma = NULL
                   ,R = NULL
-                  ,gammaadj = TRUE
+                  ,fixEnrollTime = TRUE
                   ,eta = NULL
                   ,etaE = NULL
                   ,d = NULL
@@ -140,7 +139,7 @@ nphsim <- function(nsim = 100
   x[,cnsr1:=ifelse(t>ltfuT, 1, 0)]
 
   ## uniform enrollment in each intervals of R
-  if (isTRUE(gammaadj)){ # adjust enrollment rate while keeping R fixed
+  if (isTRUE(fixEnrollTime)){ # adjust enrollment rate while keeping R fixed
     aR <- R # keep actual enrollment period the same as input R
     agamma <- (ssC+ssE)*gamma/sum(gamma*R)  # Actual enrollment rate
     x[,enterT:=sample(rpwexp(.N,rate=.N*gamma/sum(gamma*R),intervals=R[1:length(gamma)-1],cumulative=TRUE)),by=sim]

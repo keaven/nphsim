@@ -5,8 +5,8 @@
 \title{Simulate a Clinical Trial with Piecewise Exponential Time-to-Event Outcomes}
 \usage{
 nphsim(nsim = 100, lambdaC = NULL, lambdaE = NULL, intervals = NULL,
-  ssC = NULL, ssE = NULL, gamma = NULL, R = NULL, gammaadj = TRUE,
-  eta = NULL, etaE = NULL, d = NULL)
+  ssC = NULL, ssE = NULL, gamma = NULL, R = NULL,
+  fixEnrollTime = TRUE, eta = NULL, etaE = NULL, d = NULL)
 }
 \arguments{
 \item{nsim}{Number of simulations}
@@ -25,6 +25,9 @@ nphsim(nsim = 100, lambdaC = NULL, lambdaE = NULL, intervals = NULL,
 
 \item{R}{A vector of duration of time periods for recruitment with rates specified in gamma; should be same length as gamma}
 
+\item{fixEnrollTime}{if \code{TRUE} the enrollment period \code{R} is fixed and enrollment rate is adjusted proportionally to meet the sample size; 
+otherwise the last interval of R is adjusted to meet the sample size without adjustment to the enrollment rate.}
+
 \item{eta}{A vector for dropout rate per unit time for control arm}
 
 \item{etaE}{A vector for dropout rate per unit time for experiment arm}
@@ -35,12 +38,9 @@ nphsim(nsim = 100, lambdaC = NULL, lambdaE = NULL, intervals = NULL,
 The function return a list with the follow components
 \describe{
  \item{nsim, lambdaC, lambdaE, ssC, ssE, intervals}{as Input} 
- \item{gamma}{Actual enrollment rate per enrollment period. If the user provided an enrollment rate 
- that matched the sample size given \code{R} this will be the same as the input \code{gamma} otherwise the actual enrollment rate will be
- calculated using the same ratio as input.}
- \item{R}{enrollment period: as Input}
- \item{gammaadj}{if \code{TRUE} the enrollment period \code{R} is fixed and enrollment rate is adjusted proportionally to meet the sample size; 
- otherwise the last interval of R is adjusted to meet the sample size without adjustment to the enrollment rate.}
+ \item{gamma}{actual enrollment rate per enrollment period. If \code{fixEnrollTime} is not \code{TRUE} this is the same as the input \code{gamma}}
+ \item{R}{actual enrollment period. If \code{fixEnrollTime} is \code{TRUE} this is the same as input \code{R}, otherwise
+ the last interval of the input \code{R} will be adjusted to meet the specified sample size while keeping \code{gamma} fixed.}
  \item{etaC}{same as eta} 
  \item{etaE}{as Input or equal to etaC if Input is NULL} 
  \item{simd}{data table object that stores the simulated data
