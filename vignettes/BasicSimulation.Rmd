@@ -18,7 +18,6 @@ This includes:
 - Simulating times-to-events with a piecewise exponential distribution
 - Simulating a clinical trial (fixed design) by combining the above capabilities
 - Performing various statistical tests on a simulated clinical trial
-- Approximating power with simulation for a group sequential derived using the `gsDesign` package
 
 
 ## Simulating Enrollment
@@ -26,35 +25,35 @@ This includes:
 We use piecewise constant enrollment and piecewise exponential failure rates as methods to approximate arbitrary patterns of enrollment and dropouts. We specify an example non-proportional hazards scenario.
 
 We approximate an arbitrary enrollment pattern by assuming constant enrollment rates within fixed time periods.
-The length of enrollment periods prior to the final stable enrollment (2, 4, respectively) are specified here: 
+The length of enrollment periods prior to the final stable enrollment (2, 4, respectively) are specified here; the final duration of 12 in the third period may be extended or shortened to achieve enrollment. 
 
 ```{r}
-enrollIntervals <- c(2, 4, 12)
+enrollIntervals <- c(2, 4)
 ```
 
 Thus, we assume enrollment is constant in months 1-2, 3-6, and from month 7 onward.
 Next we specify relative rates of enrollment in these time periods: 
 
 ```{r}
-enrollRates <- c(1, 2, 4)
+enrollRates <- c(.5, 3, 16)
 ```
 
-Let's say we wish to enroll 200 patients, starting with 10 patients per month.
+Let's say we wish to enroll 200 patients, starting with 7 patients per month and doubling after month 2 and month 6 as specified above.
+
 We generate random enrollment times as follows:
 
 ```{r}
 library(nphsim)
-enrollTimes <- rpwexp(n = 300, rate = 10 * enrollRates, intervals = enrollIntervals, cumulative = TRUE)
+enrollTimes <- rpwexp(n = 300, rate = 7 * enrollRates, intervals = enrollIntervals, cumulative = TRUE)
 ```
 
 When 'cumulative = TRUE` is input to `rpwexp`, it is designed to simulate enrollment with rates specified in `rate`. 
-We plot the enrollment over time:
 
 ```{r, fig.cap = "Plot of simulated enrollment."}
 library(ggplot2)
 qplot(x = c(0, enrollTimes), y = 0:length(enrollTimes), geom="step", 
       ylab="Number enrolled", xlab="Time") +
-      scale_x_continuous(breaks=c(0,2,6,10))
+      scale_x_continuous(breaks=c(0,6,12,18))
 ```
 
 You can see the enrollment rate increases from the first 2 months to months 3-6 and again in the period after month 6.
@@ -67,10 +66,11 @@ We have a different set of intervals to define the periods of time for which dif
 
 ```{r}
 # Failure rates for piecewise exponential time periods
-failRates <- c(.8, .4, .2, .1)
-# Interval durations before final stable rate
+failRates <- c(.3, .6, .5)
+# Interval duration(s) before final stable rate
 # Note that length is 1 fewer than for failRates
-failIntervals <- c(0, 3, 6)
+# and should be NULL if there is only 1 failure rate
+failIntervals <- c(1,4)
 ```
 
 Now we generate the piecewise exponential failure times corresponding to the patient enrollment previously simulated, again using `rpwexp`.
@@ -81,7 +81,7 @@ n <- length(enrollTimes)
 y <- rpwexp(n = n, rate = failRates, intervals = failIntervals)
 ```
 
-The longest duration among these is `max(y) = ` `r max(y)`.
+The longest duration among these is `max(y) = ` `r round(max(y),1)`.
 Although we will eventually be interested in generating censored survival times, this is not done here; there is a value for event time each simulated patient. 
 We plot the duration of time until an event for all patients ordered by decreasing time which reproduces the shape of the Kaplan-Meier curve for the points; the `theme` function removes the y-axis as well as its labels and tick-marks.
 Note that at random there are some patients with very long simulated times.
@@ -92,7 +92,7 @@ id <- 1:n
 dta <- data.frame(N=factor(c(id,id)),Time=c(array(0,n), sort(y, decreasing = TRUE)))
 ggplot(dta, aes(x = Time, y = N, grp = N)) + geom_line() +
        xlab("Time-to-event") + ylab("Patients ordered by time-to-event") +
-  scale_x_continuous(breaks=(0:4)*6) + 
+  scale_x_continuous(breaks=(0:4)*6) +
   theme(axis.text.y=element_blank(),axis.ticks.y=element_blank())
 ```
 
@@ -101,24 +101,23 @@ ggplot(dta, aes(x = Time, y = N, grp = N)) + geom_line() +
 # Simulating a 2-Arm Trial Instance with Non-Proportional Hazards
 
 We now proceed to simulating a clinical trial with the control group rate specified above and with an experimental group having piecewise exponential rates generated according to a non-proportional hazards assumption.
-The parameters here appear somewhat different than above in `rpwexp` examples as they follow variable names used in the `gsDesign` R package. [SHOULD WE CHANGE THIS???]
+The parameters here appear somewhat different than above in `rpwexp` examples as they follow variable names used in the `gsDesign` R package.
+We make the sample size large so that the resulting estimated survival should approximate the underlying distributions closely.
 
 ```{r}
 # Hazard ratio corresponding to control group event rates above
-# and corresponding failure rates for experimental group
-hr <- c(1, .7, .5, .3)
-lambdaE <- hr * failRates
+hr <- c(1, .6, .3)
 # Sample size of control and experimental arms
-ssC <- n
-ssE <- n
-# We assume dropouts at a rate of .05, increasing to .1 at end
+ssC <- 5000
+ssE <- 5000
+# We assume dropouts at a rate of .1 per time unit, increasing to .3 at end
 # dropout rates specified for same intervals as failure rates
-eta <- c(.1,.1,.1,.3)
+eta <- c(.1,.1,.3)
 # Simulate a single trial instance
 # We add an arbitrary enrollment interval for indefinite enrollment duration
-trial <- nphsim(nsim = 1, lambdaC = failRates, lambdaE = lambdaE,
+trial <- nphsim(nsim = 1, lambdaC = failRates, lambdaE = failRates*hr,
                 intervals = failIntervals, ssC = ssC, ssE = ssE,
-                gamma = 2 * enrollRates, R = c(enrollIntervals),
+                gamma = 2 * enrollRates, R = enrollIntervals,
                 eta = eta, etaE = eta)
 # show a few lines
 head(trial$simd, n=5)
@@ -137,18 +136,27 @@ summary(trial$simd$enterT+trial$simd$survival)
 
 We compare the distributions of times to events by computing Kaplan-Meier curves.
 The curves appear to separate more as time goes on and the hazard ratio becomes more extreme.
+We would expect no separation over the first `r enrollIntervals[1]` where the hazard ratio is 1, with increasing separation over time. 
 
 ```{r}
 library(survival)
-plot(with(trial$simd, survfit(Surv(survival, 1- cnsr) ~ treatment)))
+plot(with(trial$simd, survfit(Surv(survival, 1-cnsr) ~ treatment)))
 ```
 
 # Performing an analysis
 
-Now suppose we wish to test after 300 events.
+Now suppose we wish to test after 900 events. First, we test with a logrank statistic:
 
 ```{r}
-testOut <- simtest(x = trial, anaD=300, method='LR')
+testOut <- simtest(x = trial, anaD=900, method='LR')
 testOut$result
 ```
 
+Now we test at the same time, this time using a Harrington-Fleming test with $\rho=0$, $\gamma=1$:
+
+
+```{r}
+library(survMisc) # needed for weighted logrank
+testOut <- simtest(x = trial, anaD=900, method=wlr.Stat, fparam=list(FH=c(0,1), wlr='1', APPLE=1))
+testOut$result
+```
