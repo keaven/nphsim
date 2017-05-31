@@ -17,7 +17,7 @@
 #' @param ssC Sample size of control arm
 #' @param ssE Sample size of experiment arm
 #' @param gamma A vector of rate of enrollment per unit of time
-#' @param R A vector of duration of time periods for recruitment with rates specified in gamma; should be same length as gamma
+#' @param R A vector of duration of time periods for recruitment with rates specified in gamma; should be same length as gamma or 1 less.
 #' @param fixEnrollTime if \code{TRUE} the enrollment period \code{R} is fixed and enrollment rate is adjusted proportionally to meet the sample size; 
 #'  otherwise the last interval of R is adjusted to meet the sample size without adjustment to the enrollment rate.
 #' @param eta A vector for dropout rate per unit time for control arm
@@ -140,10 +140,16 @@ nphsim <- function(nsim = 100
 
   ## uniform enrollment in each intervals of R
   if (isTRUE(fixEnrollTime)){ # adjust enrollment rate while keeping R fixed
+    if (length(gamma)!=length(R)){
+      stop ("For fixed enrollment time gamma and R have to be the same length.")
+    }
     aR <- R # keep actual enrollment period the same as input R
     agamma <- (ssC+ssE)*gamma/sum(gamma*R)  # Actual enrollment rate
     x[,enterT:=sample(rpwexp(.N,rate=.N*gamma/sum(gamma*R),intervals=R[1:length(gamma)-1],cumulative=TRUE)),by=sim]
   } else{ # adjust the last interval of R while keeping enrollment rate fixed
+    if (!(length(gamma)==length(R)|length(gamma)-length(R)==1)){ ## R has to be the same length as gamma or 1 less
+      stop ("The length of R has to be the same as gamma or 1 less")
+    }
     agamma <- gamma
     aR <- R
     if ((ssC+ssE)-sum(gamma[1:length(gamma)-1]*R[1:length(gamma)-1])<=0) {
