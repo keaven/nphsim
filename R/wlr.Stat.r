@@ -9,12 +9,8 @@
 #'  \item{sqrtN}{Tarone-Ware}
 #'  \item{S1}{Peto-Peto's modified survival estimate}
 #'  \item{S2}{modified Peto-Peto (by Andersen)}
-#'  \item{FH01}{Fleming-Harrington(0,1)}
-#'  \item{FH10}{Fleming-Harrington(1,0)}
-#'  \item{FH11}{Fleming-Harrington(1,1)}
-#'  \item{FH11}{Fleming-Harrington(1,1)}
-#'  \item{FH}{Fleming-Harrington with user specified \code{rho} and \code{gamma}}
 #'  \item{APPLE}{Simplified APPLE method with user specified late separation time}
+#'  \item{FH(rho,gamma)}{Fleming-Harrington with user specified pairs of \code{rho} and \code{gamma}}
 #'  }
 #'
 #' @param survival time-to-event variable
@@ -23,9 +19,12 @@
 #' @param stra stratification variable. Default is \code{NULL} (currently not implemented)
 #' @param fparam a list input to request additional FH test and time of delayed separation in the simplified APPLE method
 #' \describe{
-#'  \item{\code{fparam$FH(rho, gamma)}}{request FH p-Value with rho and gamma (e.g. rho=0 and gamma=0 is logrank test)} 
+#'  \item{\code{fparam$rho}}{a vector of \code{rho} to be used in Fleming-Harrington FH(rho, gamma)} 
+#'  \item{\code{fparam$gamma}}{a vector of \code{gamma} to be used in Fleming-Harrington \code{FH(rho, gamma)}. 
+#'  The length of \code{gamma} needs to be the same as \code{rho}} 
 #'  \item{\code{fparam$wlr}}{test name of which the p-Value will be stored in the variable \code{pval}. 
-#'  Accepted values are "1", "n", "sqrtN", "S1", "S2", "FH01","FH10","FH11","FH","APPLE"}
+#'  Accepted values are "1", "n", "sqrtN", "S1", "S2", "APPLE", or "FH(rho,gamma)" where \code{rho} and \code{gamma} is one of the
+#'  pair specified by user in the \code{fparam}}
 #'  \item{\code{fparam$APPLE}}{time of delayed separation used in the simplified APPLE method}
 #'  } 
 #' @return The function return a list with the follow components
@@ -43,24 +42,31 @@
 #' gamma <- c(2.5, 5,  7.5,  10) ## a ramp-up enrollment
 #' R     <- c(2  , 2,  2  ,  6 ) ## enrollment period: total of 12 months
 #' eta <- -log(0.99) ## 1% monthly dropout rate
-#' sim1 <- nphsim(nsim=1,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
-#' test1 <- simtest(x=sim1, anaD=c(250,300), method=wlr.Stat,fparam=list(FH=c(0,2), wlr='1', APPLE=3))
+#' sim1 <- nphsim(nsim=2,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
+#' test1 <- simtest(x=sim1, anaD=c(250,300), method=wlr.Stat,fparam=list(rho=c(0,0,1), gamma=c(0,1,1), wlr='FH(0,1)', APPLE=3))
 #' test1$result[]
 #' 
 #' # direct function call (without cutoff)
-#' wlr.Stat(surv=sim1$simd$survival, cnsr=sim1$simd$cnsr, trt=sim1$simd$treatment,fparam=list(FH=c(0,2), wlr='1', APPLE=3))
+#' wlr.Stat(surv=sim1$simd$survival, cnsr=sim1$simd$cnsr, trt=sim1$simd$treatment,fparam=list(rho=c(0,0,1), gamma=c(0,1,1), wlr='FH(0,1)', APPLE=3))
 #' 
 #' @export
 #' @import data.table
 #' @importFrom survMisc ten COV 
 #' 
 wlr.Stat <- function(survival, cnsr, trt, stra = NULL, fparam) {
-  d <- data.table::data.table(survival = survival, cnsr = cnsr, trt = trt)
+  if (length(fparam$rho)!=length(fparam$gamma)){
+    stop("rho and gamma have to be of the same length")
+  }
+  d <- data.table(survival = survival, cnsr = cnsr, trt = trt)
   x <- ten(survfit(Surv(survival, 1 - cnsr) ~ trt, data = d))
   t1 <- x[e > 0, t, by = t][, t]
-  wt1 <- data.table::data.table(array(data = 1, dim = c(length(t1), 10)))
+  wt1 <- data.table(array(data = 1, dim = c(length(t1), 6L + length(fparam$rho))))
+  FHn <- paste("FH(", fparam$rho, ",", fparam$gamma,")", sep="")
+  if (!fparam$wlr %in% FHn){
+    stop("fparam$wlr value is invalid. Refer to the help document for a list of allowed values.")
+  }
   
-  n1 <- c("1", "n", "sqrtN", "S1", "S2", "FH01", "FH10", "FH11", "FH", "APPLE")
+  n1 <- c("1", "n", "sqrtN", "S1", "S2", "APPLE", FHn)
   data.table::setnames(wt1, n1)
   ## Gehan-Breslow generalized Wilcoxon, weight = n
   data.table::set(wt1, j = "n", value = x[e > 0, max(n), by = t][, V1])
@@ -73,8 +79,8 @@ wlr.Stat <- function(survival, cnsr, trt, stra = NULL, fparam) {
   ## Fleming-Harrington
   S3 <- sf(x = x[e > 0, sum(e), by = t][, V1], n = x[e > 0, max(n), by = t][, V1], what = "S")
   S3 <- c(1, S3[seq.int(length(S3) - 1L)])
-  wt1[, `:=`(FH01, (1 - S3))][, `:=`(FH10, S3)][, `:=`(FH11, S3 * (1 - S3))][, `:=`(FH, S3^fparam$FH[1] * ((1 - S3)^fparam$FH[2]))]  ## FH p, q
-  
+  wt1[, (FHn) := mapply(function(p, q) S3^p * ((1 - S3)^q), fparam$rho, fparam$gamma, SIMPLIFY=FALSE)]
+ 
   ## simplified APPLE, w1=0 and w2=1, separate at delayed separation point
   data.table::set(wt1, j = "APPLE", value = x[e > 0, ifelse(t < fparam$APPLE, 0, 1), by = t][, V1])
   

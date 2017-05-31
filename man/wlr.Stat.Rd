@@ -17,9 +17,12 @@ wlr.Stat(survival, cnsr, trt, stra = NULL, fparam)
 
 \item{fparam}{a list input to request additional FH test and time of delayed separation in the simplified APPLE method
 \describe{
- \item{\code{fparam$FH(rho, gamma)}}{request FH p-Value with rho and gamma (e.g. rho=0 and gamma=0 is logrank test)} 
+ \item{\code{fparam$rho}}{a vector of \code{rho} to be used in Fleming-Harrington FH(rho, gamma)} 
+ \item{\code{fparam$gamma}}{a vector of \code{gamma} to be used in Fleming-Harrington \code{FH(rho, gamma)}. 
+ The length of \code{gamma} needs to be the same as \code{rho}} 
  \item{\code{fparam$wlr}}{test name of which the p-Value will be stored in the variable \code{pval}. 
- Accepted values are "1", "n", "sqrtN", "S1", "S2", "FH01","FH10","FH11","FH","APPLE"}
+ Accepted values are "1", "n", "sqrtN", "S1", "S2", "APPLE", or "FH(rho,gamma)" where \code{rho} and \code{gamma} is one of the
+ pair specified by user in the \code{fparam}}
  \item{\code{fparam$APPLE}}{time of delayed separation used in the simplified APPLE method}
  }}
 }
@@ -41,12 +44,8 @@ The p-Values from the following weighted tests are included:
  \item{sqrtN}{Tarone-Ware}
  \item{S1}{Peto-Peto's modified survival estimate}
  \item{S2}{modified Peto-Peto (by Andersen)}
- \item{FH01}{Fleming-Harrington(0,1)}
- \item{FH10}{Fleming-Harrington(1,0)}
- \item{FH11}{Fleming-Harrington(1,1)}
- \item{FH11}{Fleming-Harrington(1,1)}
- \item{FH}{Fleming-Harrington with user specified \code{rho} and \code{gamma}}
  \item{APPLE}{Simplified APPLE method with user specified late separation time}
+ \item{FH(rho,gamma)}{Fleming-Harrington with user specified pairs of \code{rho} and \code{gamma}}
  }
 }
 \examples{
@@ -58,11 +57,11 @@ intervals <- 3
 gamma <- c(2.5, 5,  7.5,  10) ## a ramp-up enrollment
 R     <- c(2  , 2,  2  ,  6 ) ## enrollment period: total of 12 months
 eta <- -log(0.99) ## 1\% monthly dropout rate
-sim1 <- nphsim(nsim=1,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
-test1 <- simtest(x=sim1, anaD=c(250,300), method=wlr.Stat,fparam=list(FH=c(0,2), wlr='1', APPLE=3))
+sim1 <- nphsim(nsim=2,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
+test1 <- simtest(x=sim1, anaD=c(250,300), method=wlr.Stat,fparam=list(rho=c(0,0,1), gamma=c(0,1,1), wlr='FH(0,1)', APPLE=3))
 test1$result[]
 
 # direct function call (without cutoff)
-wlr.Stat(surv=sim1$simd$survival, cnsr=sim1$simd$cnsr, trt=sim1$simd$treatment,fparam=list(FH=c(0,2), wlr='1', APPLE=3))
+wlr.Stat(surv=sim1$simd$survival, cnsr=sim1$simd$cnsr, trt=sim1$simd$treatment,fparam=list(rho=c(0,0,1), gamma=c(0,1,1), wlr='FH(0,1)', APPLE=3))
 
 }
