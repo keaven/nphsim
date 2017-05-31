@@ -152,11 +152,11 @@ testOut <- simtest(x = trial, anaD=900, method='LR')
 testOut$result
 ```
 
-Now we test at the same time, this time using a Harrington-Fleming test with $\rho=0$, $\gamma=1$:
+Now we test at the same time, this time using a Harrington-Fleming test with $\rho=0$, $\gamma=1$ and $\rho=1$, $\gamma=1$
 
 
 ```{r}
 library(survMisc) # needed for weighted logrank
-testOut <- simtest(x = trial, anaD=900, method=wlr.Stat, fparam=list(FH=c(0,1), wlr='1', APPLE=1))
+testOut <- simtest(x = trial, anaD=900, method=wlr.Stat, fparam=list(rho=c(0,1), gamma=c(1,1), wlr='FH(0,1)', APPLE=1))
 testOut$result
 ```
