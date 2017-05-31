@@ -117,7 +117,7 @@ eta <- c(.1,.1,.3)
 # We add an arbitrary enrollment interval for indefinite enrollment duration
 trial <- nphsim(nsim = 1, lambdaC = failRates, lambdaE = failRates*hr,
                 intervals = failIntervals, ssC = ssC, ssE = ssE,
-                gamma = 2 * enrollRates, R = enrollIntervals,
+                gamma = 2 * enrollRates, R = enrollIntervals, fixEnrollTime = FALSE,
                 eta = eta, etaE = eta)
 # show a few lines
 head(trial$simd, n=5)

@@ -23,7 +23,7 @@ nphsim(nsim = 100, lambdaC = NULL, lambdaE = NULL, intervals = NULL,
 
 \item{gamma}{A vector of rate of enrollment per unit of time}
 
-\item{R}{A vector of duration of time periods for recruitment with rates specified in gamma; should be same length as gamma}
+\item{R}{A vector of duration of time periods for recruitment with rates specified in gamma; should be same length as gamma or 1 less.}
 
 \item{fixEnrollTime}{if \code{TRUE} the enrollment period \code{R} is fixed and enrollment rate is adjusted proportionally to meet the sample size; 
 otherwise the last interval of R is adjusted to meet the sample size without adjustment to the enrollment rate.}
