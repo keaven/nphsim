@@ -62,11 +62,12 @@ wlr.Stat <- function(survival, cnsr, trt, stra = NULL, fparam) {
   t1 <- x[e > 0, t, by = t][, t]
   wt1 <- data.table(array(data = 1, dim = c(length(t1), 6L + length(fparam$rho))))
   FHn <- paste("FH(", fparam$rho, ",", fparam$gamma,")", sep="")
-  if (!fparam$wlr %in% FHn){
+
+  n1 <- c("1", "n", "sqrtN", "S1", "S2", "APPLE", FHn)
+  if (!fparam$wlr %in% n1){
     stop("fparam$wlr value is invalid. Refer to the help document for a list of allowed values.")
   }
   
-  n1 <- c("1", "n", "sqrtN", "S1", "S2", "APPLE", FHn)
   data.table::setnames(wt1, n1)
   ## Gehan-Breslow generalized Wilcoxon, weight = n
   data.table::set(wt1, j = "n", value = x[e > 0, max(n), by = t][, V1])
