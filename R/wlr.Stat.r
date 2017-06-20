@@ -16,7 +16,7 @@
 #' @param survival time-to-event variable
 #' @param cnsr censoring variable: 1=censoring, 0=event
 #' @param trt  treatment varaible. Accepted values are either "experiment" or "control"
-#' @param stra stratification variable. Default is \code{NULL} (currently not implemented)
+#' @param stra stratification variable for stratified weighted logrank test. Default is \code{NULL}.
 #' @param fparam a list input to request additional FH test and time of delayed separation in the simplified APPLE method
 #' \describe{
 #'  \item{\code{fparam$rho}}{a vector of \code{rho} to be used in Fleming-Harrington FH(rho, gamma)} 
@@ -57,65 +57,75 @@ wlr.Stat <- function(survival, cnsr, trt, stra = NULL, fparam) {
   if (length(fparam$rho)!=length(fparam$gamma)){
     stop("rho and gamma have to be of the same length")
   }
-  d <- data.table(survival = survival, cnsr = cnsr, trt = trt)
-  x <- ten(survfit(Surv(survival, 1 - cnsr) ~ trt, data = d))
-  t1 <- x[e > 0, t, by = t][, t]
-  wt1 <- data.table(array(data = 1, dim = c(length(t1), 6L + length(fparam$rho))))
-  FHn <- paste("FH(", fparam$rho, ",", fparam$gamma,")", sep="")
-
-  n1 <- c("1", "n", "sqrtN", "S1", "S2", "APPLE", FHn)
-  if (!fparam$wlr %in% n1){
-    stop("fparam$wlr value is invalid. Refer to the help document for a list of allowed values.")
-  }
+  if (is.null(stra)){stra=1}
+  stralvl <- unique(stra)
+  r<-NULL   # to hold the final statistics for each strata 
+  for (i in 1:length(stralvl)) {
+    d <- data.table(survival = survival, cnsr = cnsr, trt = trt, stra=stra)
+    d <- d[stra==stralvl[i]]
+    x <- ten(survfit(Surv(survival, 1 - cnsr) ~ trt, data = d))
+    if (!attr(x, "sorted")=="t") setkey(x, t)
+    t1 <- x[e > 0, t, by = t][, t]
+    wt <- data.table(array(data = 1, dim = c(length(t1), 6L + length(fparam$rho))))
+    FHn <- paste("FH(", fparam$rho, ",", fparam$gamma,")", sep="")
   
-  data.table::setnames(wt1, n1)
-  ## Gehan-Breslow generalized Wilcoxon, weight = n
-  data.table::set(wt1, j = "n", value = x[e > 0, max(n), by = t][, V1])
-  ## Tarone-Ware, weight = sqrt(n)
-  data.table::set(wt1, j = "sqrtN", value = wt1[, sqrt(.SD), .SDcols = "n"])
-  ## Peto-Peto, weight = S(t) = modified estimator of survival function
-  data.table::set(wt1, j = "S1", value = cumprod(x[e > 0, 1 - sum(e)/(max(n) + 1), by = t][, V1]))
-  ## modified Peto-Peto (by Andersen), weight = S(t)n / n+1
-  data.table::set(wt1, j = "S2", value = wt1[, S1] * x[e > 0, max(n)/(max(n) + 1), by = t][, V1])
-  ## Fleming-Harrington
-  S3 <- sf(x = x[e > 0, sum(e), by = t][, V1], n = x[e > 0, max(n), by = t][, V1], what = "S")
-  S3 <- c(1, S3[seq.int(length(S3) - 1L)])
-  wt1[, (FHn) := mapply(function(p, q) S3^p * ((1 - S3)^q), fparam$rho, fparam$gamma, SIMPLIFY=FALSE)]
- 
-  ## simplified APPLE, w1=0 and w2=1, separate at delayed separation point
-  data.table::set(wt1, j = "APPLE", value = x[e > 0, ifelse(t < fparam$APPLE, 0, 1), by = t][, V1])
+    n1 <- c("1", "n", "sqrtN", "S1", "S2", "APPLE", FHn)
+    if (!fparam$wlr %in% n1){
+      stop("fparam$wlr value is invalid. Refer to the help document for a list of allowed values.")
+    }
+    
+    data.table::setnames(wt, n1)
+    ## Gehan-Breslow generalized Wilcoxon, weight = n
+    data.table::set(wt, j = "n", value = x[e > 0, max(n), by = t][, V1])
+    ## Tarone-Ware, weight = sqrt(n)
+    data.table::set(wt, j = "sqrtN", value = wt[, sqrt(.SD), .SDcols = "n"])
+    ## Peto-Peto, weight = S(t) = modified estimator of survival function
+    data.table::set(wt, j = "S1", value = cumprod(x[e > 0, 1 - sum(e)/(max(n) + 1), by = t][, V1]))
+    ## modified Peto-Peto (by Andersen), weight = S(t)n / n+1
+    data.table::set(wt, j = "S2", value = wt[, S1] * x[e > 0, max(n)/(max(n) + 1), by = t][, V1])
+    ## Fleming-Harrington
+    S3 <- sf(x = x[e > 0, sum(e), by = t][, V1], n = x[e > 0, max(n), by = t][, V1], what = "S")
+    S3 <- c(1, S3[seq.int(length(S3) - 1L)])
+    wt[, (FHn) := mapply(function(p, q) S3^p * ((1 - S3)^q), fparam$rho, fparam$gamma, SIMPLIFY=FALSE)]
   
-  n2 <- c("W", "Q", "Var", "Z", "pNorm", "chiSq", "df", "pChisq")
-  res1 <- data.table(matrix(0, nrow = ncol(wt1), ncol = length(n2)))
-  setnames(res1, n2)
-  set(res1, j = 1L, value = n1)
-  predict(x)
-  ## events minus predicted
-  eMP1 <- attr(x, "pred")
-  eMP1 <- eMP1[rowSums(eMP1) > 0, ]
-  ## covariance
-  COV(x)
-  cov1 <- attr(x, "COV")
-  if (is.null(dim(cov1))) {
-    cov1 <- cov1[names(cov1) %in% t1]
-  } else {
-    ## 3rd dimension = times
-    cov1 <- cov1[, , dimnames(cov1)[[3]] %in% t1]
-  }
-  eMP1 <- unlist(eMP1[, .SD, .SDcols = (length(eMP1) - 1L)])
-  data.table::set(res1, j = "Q", value = colSums(wt1 * eMP1))
-  data.table::set(res1, j = "Var", value = colSums(wt1^2 * cov1))
+    
+    ## simplified APPLE, w1=0 and w2=1, separate at delayed separation point
+    data.table::set(wt, j = "APPLE", value = x[e > 0, ifelse(t < fparam$APPLE, 0, 1), by = t][, V1])
   
-  res1[, `:=`("Z", Q/sqrt(Var))]
-  res1[, `:=`("pNorm", 2 * (1 - stats::pnorm(abs(Z))))]
-  res1[, `:=`("chiSq", Q^2/Var)]
-  res1[, `:=`("df", 1)]
-  res1[, `:=`("pChisq", 1 - stats::pchisq(chiSq, df))]
-  res1[, `:=`("onesidedp", ifelse(Z < 0, pNorm/2, (1 - pNorm/2)))]
+    
+    n2 <- c("W", "Q", "Var", "Z", "pNorm", "chiSq", "df", "pChisq")
+    res <- data.table(matrix(0, nrow = ncol(wt), ncol = length(n2)))
+    setnames(res, n2)
+    set(res, j = 1L, value = n1)
+    predict(x)
+    ## events minus predicted
+    eMP1 <- attr(x, "pred")
+    eMP1 <- eMP1[rowSums(eMP1) > 0, ]
+    ## covariance
+    COV(x)
+    cov1 <- attr(x, "COV")
+    if (is.null(dim(cov1))) {
+      cov1 <- cov1[names(cov1) %in% t1]
+    } else {
+      ## 3rd dimension = times
+      cov1 <- cov1[, , dimnames(cov1)[[3]] %in% t1]
+    }
+    eMP1 <- unlist(eMP1[, .SD, .SDcols = (length(eMP1) - 1L)])
+    data.table::set(res, j = "Q", value = colSums(wt * eMP1))
+    data.table::set(res, j = "Var", value = colSums(wt^2 * cov1))
+    r<-rbind(r,res)
+  }  
+  res<- r[,.(Q=sum(Q),Var=sum(Var)),by=W]
+  res[, `:=`("Z", Q/sqrt(Var))]
+  res[, `:=`("pNorm", 2 * (1 - stats::pnorm(abs(Z))))]
+  res[, `:=`("chiSq", Q^2/Var)]
+  res[, `:=`("df", 1)]
+  res[, `:=`("pChisq", 1 - stats::pchisq(chiSq, df))]
+  res[, `:=`("onesidedp", ifelse(Z < 0, pNorm/2, (1 - pNorm/2)))]
   
-  pvals <- transpose(res1[, .(onesidedp)])
+  pvals <- transpose(res[, .(onesidedp)])
   setnames(pvals, paste0("pval_", n1))
-  pval = res1[W == fparam$wlr, onesidedp]
+  pval = res[W == fparam$wlr, onesidedp]
   y <- cbind(pval, pvals)
   
   return(y)
