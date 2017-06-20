@@ -13,7 +13,7 @@ wlr.Stat(survival, cnsr, trt, stra = NULL, fparam)
 
 \item{trt}{treatment varaible. Accepted values are either "experiment" or "control"}
 
-\item{stra}{stratification variable. Default is \code{NULL} (currently not implemented)}
+\item{stra}{stratification variable for stratified weighted logrank test. Default is \code{NULL}.}
 
 \item{fparam}{a list input to request additional FH test and time of delayed separation in the simplified APPLE method
 \describe{
