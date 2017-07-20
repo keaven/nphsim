@@ -3,7 +3,8 @@
 #' Simulate two-arm time-to-event data using the piecewise exponential distribution \code{rpwexp()}. 
 #' User can specify enrollment speed as well as drop out rate separately for each arm. Additionaly if user has created
 #' a gsSurv object from \code{\link[gsDesign:nSurv]{gsDesign}} it can be used as input to supply simulation parameters. The only
-#' censoring mechanism is from dropout of the study and no administrative censoring is implemented.
+#' censoring mechanism is from dropout of the study and no administrative censoring is implemented. The administrative censoring (such as interim or final analysis)
+#' are implemented in the \code{simtest()} function.
 #'
 #' All the simulation parameters: sample size, hazard rate in each interval and the interval duration, 
 #' enrollment time period and enrollment speed, and the piecewise dropout rate for the same interval duration need to be provided 
@@ -21,7 +22,7 @@
 #' @param fixEnrollTime if \code{TRUE} the enrollment period \code{R} is fixed and enrollment rate is adjusted proportionally to meet the sample size; 
 #'  otherwise the last interval of R is adjusted to meet the sample size without adjustment to the enrollment rate.
 #' @param eta A vector for dropout rate per unit time for control arm
-#' @param etaE A vector for dropout rate per unit time for experiment arm
+#' @param etaE A vector for dropout rate per unit time for experiment arm. If left NULL, it uses the same dropout rate as eta.
 #' @param d A gsSurv object as input. The other inputs overwrite the corresponding parameters if not NULL
 #' 
 #' @return The function return a list with the follow components
@@ -166,7 +167,8 @@ nphsim <- function(nsim = 100
   x[,survival:=t1][,cnsr:=cnsr1]
   x[,c("cnsr1","t1","t","ltfuT"):=NULL]  ## remove intermediate variables
   x[,treatment:=relevel(factor(treatment),ref='control')]  ## set control as reference level
-
+  setorder(x,sim)
+  
   y<-list(nsim=nsim,
           lambdaC=lambdaC,
           lambdaE=lambdaE,

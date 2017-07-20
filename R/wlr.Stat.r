@@ -51,7 +51,7 @@
 #' 
 #' @export
 #' @import data.table
-#' @importFrom survMisc ten COV 
+#' @importFrom survMisc ten COV sf
 #' 
 wlr.Stat <- function(survival, cnsr, trt, stra = NULL, fparam) {
   if (length(fparam$rho)!=length(fparam$gamma)){
