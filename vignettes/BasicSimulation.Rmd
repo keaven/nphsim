@@ -145,18 +145,41 @@ plot(with(trial$simd, survfit(Surv(survival, 1-cnsr) ~ treatment)))
 
 # Performing an analysis
 
-Now suppose we wish to test after 900 events. First, we test with a logrank statistic:
+Now suppose we wish to test after 900 events. First, we test with a logrank statistic. 
 
 ```{r}
 testOut <- simtest(x = trial, anaD=900, method='LR')
 testOut$result
 ```
+The values after that you see above are:
 
-Now we test at the same time, this time using a Harrington-Fleming test with $\rho=0$, $\gamma=1$ and $\rho=1$, $\gamma=1$
+- ID number (sequential) for each simulation (`sim`)
+- analysis number for the analysis (`analysis`; e.g., a group sequential design would have multiple analyses
+- the time since start of randomization until the analysis (`t`)
+- the simulation sample size in the experimental and control arms (`NE` and `NC`, respectively)
+- the number of events in the expermental (`DE`) and control (`DC`) arms as well as the overall number of events at the analysis (`D`)
+- the logrank test p-value (`pval`), 
+- a Z-value corresponding to the logrank test (`z`; signed square root of the chi-square logrank test???), 
+- the hazard ratio from a Cox model for experimental compared to control treatment (`hr`); note that the sign for the above logrank z-value depends on this with negative `z` corresponding to `hr` < 1), and 
+- the standard error for the hazard ratio estimate (`sehr`).
 
+Now we consider several weighted logrank test statistics at the same time.
+For this we apply `method=wlr.Stat` below; we will explain the output after showing the code.
 
-```{r}
+```{r,message=FALSE}
 library(survMisc) # needed for weighted logrank
 testOut <- simtest(x = trial, anaD=900, method=wlr.Stat, fparam=list(rho=c(0,1), gamma=c(1,1), wlr='FH(0,1)', APPLE=1))
 testOut$result
 ```
+The first columns through `D` are as explained above.
+Following this are one-sided p-values for several weighting schemes, all of which will be produced with the only option to include an arbitrary sequence of $\rho$ and $\gamma$ parameters for the Fleming-Harrington test. 
+The tests for which p-values are displayed in this instance are:
+
+- `pval` - ???
+- `pval_1` - the logrank test
+- `pval_n` - the Gehan-Breslow generalized Wilcoxon test
+- `pval_sqrtN - the Tarone-Ware test
+- `pval_S1` - the Peto and Peto modified survival test (??? how is this best said with 'test' at the end?)
+- `pval_S2` - the Andersen-modified Peto and Peto test
+- `pval_APPLE` - the simplified APPLE method with user-specified late separation time specified in `APPLE=1` above
+- `pval_FH(0,1)`, `pvale_FH(1,1)` - Fleming-Harrington tests using the specified input values for `gamma` and `rho`
