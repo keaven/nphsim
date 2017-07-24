@@ -50,7 +50,7 @@
 #' wlr.Stat(surv=sim1$simd$survival, cnsr=sim1$simd$cnsr, trt=sim1$simd$treatment,fparam=list(rho=c(0,0,1), gamma=c(0,1,1), wlr='FH(0,1)', APPLE=3))
 #' 
 #' @export
-#' @import data.table
+#' @import data.table survival
 #' @importFrom survMisc ten COV sf
 #' 
 wlr.Stat <- function(survival, cnsr, trt, stra = NULL, fparam) {
@@ -66,32 +66,49 @@ wlr.Stat <- function(survival, cnsr, trt, stra = NULL, fparam) {
     x <- ten(survfit(Surv(survival, 1 - cnsr) ~ trt, data = d))
     if (!attr(x, "sorted")=="t") setkey(x, t)
     t1 <- x[e > 0, t, by = t][, t]
-    wt <- data.table(array(data = 1, dim = c(length(t1), 6L + length(fparam$rho))))
+   
     FHn <- paste("FH(", fparam$rho, ",", fparam$gamma,")", sep="")
-  
-    n1 <- c("1", "n", "sqrtN", "S1", "S2", "APPLE", FHn)
-    if (!fparam$wlr %in% n1){
-      stop("fparam$wlr value is invalid. Refer to the help document for a list of allowed values.")
+   
+    n1 <- c(FHn)
+    
+    if (!is.null(fparam$stdset)){
+      n1 <- c(n1, c("1", "n", "sqrtN", "S1", "S2"))
+    }
+    
+    if (!is.null(fparam$APPLE)){
+      n1 <-c(n1, "APPLE")
+    }
+    wt <- data.table(array(data = 1, dim = c(length(t1), length(n1))))
+
+    if (!is.null(fparam$wlr)){
+      if (!fparam$wlr %in% n1){
+        stop("fparam$wlr value is invalid. Refer to the help document for a list of allowed values.")
+      }
     }
     
     data.table::setnames(wt, n1)
+    
+    
+    if (!is.null(fparam$stdset)){
     ## Gehan-Breslow generalized Wilcoxon, weight = n
-    data.table::set(wt, j = "n", value = x[e > 0, max(n), by = t][, V1])
-    ## Tarone-Ware, weight = sqrt(n)
-    data.table::set(wt, j = "sqrtN", value = wt[, sqrt(.SD), .SDcols = "n"])
-    ## Peto-Peto, weight = S(t) = modified estimator of survival function
-    data.table::set(wt, j = "S1", value = cumprod(x[e > 0, 1 - sum(e)/(max(n) + 1), by = t][, V1]))
-    ## modified Peto-Peto (by Andersen), weight = S(t)n / n+1
-    data.table::set(wt, j = "S2", value = wt[, S1] * x[e > 0, max(n)/(max(n) + 1), by = t][, V1])
+      data.table::set(wt, j = "n", value = x[e > 0, max(n), by = t][, V1])
+      ## Tarone-Ware, weight = sqrt(n)
+      data.table::set(wt, j = "sqrtN", value = wt[, sqrt(.SD), .SDcols = "n"])
+      ## Peto-Peto, weight = S(t) = modified estimator of survival function
+      data.table::set(wt, j = "S1", value = cumprod(x[e > 0, 1 - sum(e)/(max(n) + 1), by = t][, V1]))
+      ## modified Peto-Peto (by Andersen), weight = S(t)n / n+1
+      data.table::set(wt, j = "S2", value = wt[, S1] * x[e > 0, max(n)/(max(n) + 1), by = t][, V1])
+    }
+    
     ## Fleming-Harrington
     S3 <- sf(x = x[e > 0, sum(e), by = t][, V1], n = x[e > 0, max(n), by = t][, V1], what = "S")
     S3 <- c(1, S3[seq.int(length(S3) - 1L)])
     wt[, (FHn) := mapply(function(p, q) S3^p * ((1 - S3)^q), fparam$rho, fparam$gamma, SIMPLIFY=FALSE)]
   
-    
-    ## simplified APPLE, w1=0 and w2=1, separate at delayed separation point
-    data.table::set(wt, j = "APPLE", value = x[e > 0, ifelse(t < fparam$APPLE, 0, 1), by = t][, V1])
-  
+    if (!is.null(fparam$APPLE)){
+      ## simplified APPLE, w1=0 and w2=1, separate at delayed separation point
+      data.table::set(wt, j = "APPLE", value = x[e > 0, ifelse(t < fparam$APPLE, 0, 1), by = t][, V1])
+    }
     
     n2 <- c("W", "Q", "Var", "Z", "pNorm", "chiSq", "df", "pChisq")
     res <- data.table(matrix(0, nrow = ncol(wt), ncol = length(n2)))
@@ -125,8 +142,11 @@ wlr.Stat <- function(survival, cnsr, trt, stra = NULL, fparam) {
   
   pvals <- transpose(res[, .(onesidedp)])
   setnames(pvals, paste0("pval_", n1))
-  pval = res[W == fparam$wlr, onesidedp]
-  y <- cbind(pval, pvals)
+  if (!is.null(fparam$wlr)){
+    pval = res[W == fparam$wlr, onesidedp]
+    pvals <-cbind(pval, pvals)
+  }
+  y <- cbind(pvals)
   
   return(y)
 }
