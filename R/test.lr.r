@@ -11,7 +11,7 @@
 #' @param stra stratification variable. Default is \code{NULL}
 #' @return The function return a list with the follow components
 #' \describe{
-#'  \item{pval}{One-side p-Value from the logrank test} 
+#'  \item{pval}{One-sided p-Value from the logrank test} 
 #'  \item{z}{z statistics from the logrank test}
 #'  \item{hr}{Hazard ratio from the cox proportional hazard model}
 #'  \item{sehr}{Standard error of the hazard ratio}

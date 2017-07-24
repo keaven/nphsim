@@ -13,16 +13,16 @@
 #'
 #' @param nsim Number of simulations
 #' @param lambdaC Hazard rate of control arm. Specify a vector for piecewise hazard with duration specified in "intervals"
-#' @param lambdaE Hazard rate of experiment arm. Specify a vector for piecewise hazard with duration specified in "intervals"
+#' @param lambdaE Hazard rate of experimental arm. Specify a vector for piecewise hazard with duration specified in "intervals"
 #' @param intervals Duration of period in which hazard is constant as specified in lambdaC. A vector with length(lambdaC)-1
 #' @param ssC Sample size of control arm
-#' @param ssE Sample size of experiment arm
+#' @param ssE Sample size of experimental arm
 #' @param gamma A vector of rate of enrollment per unit of time
 #' @param R A vector of duration of time periods for recruitment with rates specified in gamma; should be same length as gamma or 1 less.
 #' @param fixEnrollTime if \code{TRUE} the enrollment period \code{R} is fixed and enrollment rate is adjusted proportionally to meet the sample size; 
 #'  otherwise the last interval of R is adjusted to meet the sample size without adjustment to the enrollment rate.
 #' @param eta A vector for dropout rate per unit time for control arm
-#' @param etaE A vector for dropout rate per unit time for experiment arm. If left NULL, it uses the same dropout rate as eta.
+#' @param etaE A vector for dropout rate per unit time for experimental arm. If left NULL, it uses the same dropout rate as eta.
 #' @param d A gsSurv object as input. The other inputs overwrite the corresponding parameters if not NULL
 #' 
 #' @return The function return a list with the follow components
@@ -36,7 +36,7 @@
 #'  \item{simd}{data table object that stores the simulated data
 #'    \itemize{
 #'    \item{sim: simulation sequence number}
-#'    \item{treatment: "control" or "experiment"}
+#'    \item{treatment: "control" or "experimental"}
 #'    \item{enterT: calendar time a subject enters the study}
 #'    \item{ct: calendar time of event/censoring. Equals to \code{enterT + survival}}
 #'    \item{survival: simulated time-to-event value}
@@ -132,7 +132,7 @@ nphsim <- function(nsim = 100
   ## adding LTFU
   xC<-data.table(sim=c(1:nsim),t=tC,treatment='control')
   xC[,ltfuT:=rpwexp(ssC*nsim, rate = etaC+1e-8, intervals = intervals)]
-  xE<-data.table(sim=c(1:nsim),t=tE,treatment='experiment')
+  xE<-data.table(sim=c(1:nsim),t=tE,treatment='experimental')
   xE[,ltfuT:=rpwexp(ssE*nsim, rate = etaE+1e-8, intervals = intervals)]
 
   x <- rbind(xC,xE)

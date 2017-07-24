@@ -202,7 +202,7 @@ simtest <- function(x
   
   DT.sim<-DT.sim[aval > 0] ## remove subjects enrolled after specified time or number of events
   setorderv(DT.sim, c("sim", "analysis"), c(1, 1))
-  tmp1 <- DT.sim[treatment == 'experiment', .(t = t[.N],NE = .N,DE = sum(1 - cnsr)), by = .(sim, analysis)]
+  tmp1 <- DT.sim[treatment == 'experimental', .(t = t[.N],NE = .N,DE = sum(1 - cnsr)), by = .(sim, analysis)]
   tmp2 <- DT.sim[treatment == 'control', .(NC = .N, DC = sum(1 - cnsr)), by = .(sim, analysis)]
   tmp <- merge(tmp1, tmp2, by = c("sim", "analysis"), all = TRUE)[, D :=DC + DE]
   
@@ -218,7 +218,7 @@ simtest <- function(x
     } else if (is.function(method)){ ## if user defined function is used
       result<-DT.sim[, c(method(aval,cnsr,treatment,eval(e),fparam)), by=.(sim,analysis)]  
       if (!any(names(result)=="pval")){
-        stop("user defined function must return a p-Value with name 'pval'")
+        warning("user defined function did not return a p-Value with name 'pval'. The boundary crossing cannot be checked.")
       }
     }
     

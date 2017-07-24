@@ -13,13 +13,13 @@ nphsim(nsim = 100, lambdaC = NULL, lambdaE = NULL, intervals = NULL,
 
 \item{lambdaC}{Hazard rate of control arm. Specify a vector for piecewise hazard with duration specified in "intervals"}
 
-\item{lambdaE}{Hazard rate of experiment arm. Specify a vector for piecewise hazard with duration specified in "intervals"}
+\item{lambdaE}{Hazard rate of experimental arm. Specify a vector for piecewise hazard with duration specified in "intervals"}
 
 \item{intervals}{Duration of period in which hazard is constant as specified in lambdaC. A vector with length(lambdaC)-1}
 
 \item{ssC}{Sample size of control arm}
 
-\item{ssE}{Sample size of experiment arm}
+\item{ssE}{Sample size of experimental arm}
 
 \item{gamma}{A vector of rate of enrollment per unit of time}
 
@@ -30,7 +30,7 @@ otherwise the last interval of R is adjusted to meet the sample size without adj
 
 \item{eta}{A vector for dropout rate per unit time for control arm}
 
-\item{etaE}{A vector for dropout rate per unit time for experiment arm. If left NULL, it uses the same dropout rate as eta.}
+\item{etaE}{A vector for dropout rate per unit time for experimental arm. If left NULL, it uses the same dropout rate as eta.}
 
 \item{d}{A gsSurv object as input. The other inputs overwrite the corresponding parameters if not NULL}
 }
@@ -46,7 +46,7 @@ The function return a list with the follow components
  \item{simd}{data table object that stores the simulated data
    \itemize{
    \item{sim: simulation sequence number}
-   \item{treatment: "control" or "experiment"}
+   \item{treatment: "control" or "experimental"}
    \item{enterT: calendar time a subject enters the study}
    \item{ct: calendar time of event/censoring. Equals to \code{enterT + survival}}
    \item{survival: simulated time-to-event value}
