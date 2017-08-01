@@ -32,4 +32,6 @@
 #' km1 <- with(Ex3curewithph,survfit(Surv(month,evntd)~trt))
 #' km1
 #' plot(km1)
+#' with(subset(Ex3curewithph,trt==1),pwexpfit(Srv=Surv(month,evntd),array(1,4)))
+#' with(subset(Ex3curewithph,trt==0),pwexpfit(Srv=Surv(month,evntd),array(1,4)))
 "Ex3curewithph"

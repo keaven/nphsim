@@ -32,4 +32,6 @@
 #' km1 <- with(Ex1delayedEffect,survfit(Surv(month,evntd)~trt))
 #' km1
 #' plot(km1)
+#' with(subset(Ex1delayedEffect,trt==1),survfit(Surv(month,evntd)~trt))
+#' with(subset(Ex1delayedEffect,trt==0),survfit(Surv(month,evntd)~trt))
 "Ex1delayedEffect"

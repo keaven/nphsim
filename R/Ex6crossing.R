@@ -32,4 +32,6 @@
 #' km1 <- with(Ex6crossing,survfit(Surv(month,evntd)~trt))
 #' km1
 #' plot(km1)
+#' with(subset(Ex6crossing,trt==1),pwexpfit(Srv=Surv(month,evntd),3))
+#' with(subset(Ex6crossing,trt==0),pwexpfit(Srv=Surv(month,evntd),3))
 "Ex6crossing"

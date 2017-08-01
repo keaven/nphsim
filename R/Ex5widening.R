@@ -32,4 +32,6 @@
 #' km1 <- with(Ex5widening,survfit(Surv(month,evntd)~trt))
 #' km1
 #' plot(km1)
+#' with(subset(Ex5widening,trt==1),pwexpfit(Srv=Surv(month,evntd),array(6,3)))
+#' with(subset(Ex5widening,trt==0),pwexpfit(Srv=Surv(month,evntd),array(6,3)))
 "Ex5widening"
