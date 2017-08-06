@@ -180,7 +180,6 @@ simtest <- function(x
       stop("anaT and anaD need to have the same length")
     } else {
       dt <- data.table(x$simd,
-                       ct = x$simd$survival + x$simd$enterT,
                        k = 1)
       setorderv(dt, c("sim", "cnsr", "ct"), c(1, 1, 1))
       dt <- dt[, evn := c(1:(x$ssC + x$ssE))
