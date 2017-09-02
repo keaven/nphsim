@@ -17,13 +17,14 @@ wlr.Stat(survival, cnsr, trt, stra = NULL, fparam)
 
 \item{fparam}{a list input to request additional FH test and time of delayed separation in the simplified APPLE method
 \describe{
+ \item{\code{fparam$stdset}}{if not \code{NULL}, the standard set of tests are added} 
  \item{\code{fparam$rho}}{a vector of \code{rho} to be used in Fleming-Harrington FH(rho, gamma)} 
  \item{\code{fparam$gamma}}{a vector of \code{gamma} to be used in Fleming-Harrington \code{FH(rho, gamma)}. 
  The length of \code{gamma} needs to be the same as \code{rho}} 
  \item{\code{fparam$wlr}}{test name of which the p-Value will be stored in the variable \code{pval}. 
  Accepted values are "1", "n", "sqrtN", "S1", "S2", "APPLE", or "FH(rho,gamma)" where \code{rho} and \code{gamma} is one of the
  pair specified by user in the \code{fparam}}
- \item{\code{fparam$APPLE}}{time of delayed separation used in the simplified APPLE method}
+ \item{\code{fparam$APPLE}}{If not left \code{NULL}, it is the time of separation used in the simplified piecewise exponential method.}
  }}
 }
 \value{
@@ -37,13 +38,13 @@ The function return a list with the follow components
 Weighted logrank adopted from survMisc package
 }
 \details{
-The p-Values from the following weighted tests are included:
+The one-sided p-Values from the following tests can be obtained based on input from \code{fparam$stdset} and \code{fparam$APPLE}
 \describe{
- \item{1}{log-rank} 
- \item{n}{Gehan-Breslow generalized Wilcoxon}
- \item{sqrtN}{Tarone-Ware}
- \item{S1}{Peto-Peto's modified survival estimate}
- \item{S2}{modified Peto-Peto (by Andersen)}
+ \item{1}{log-rank (part of standard set)} 
+ \item{n}{Gehan-Breslow generalized Wilcoxon (part of standard set)}
+ \item{sqrtN}{Tarone-Ware (part of standard set)}
+ \item{S1}{Peto-Peto's modified survival estimate (part of standard set)}
+ \item{S2}{modified Peto-Peto (by Andersen) (part of standard set)}
  \item{APPLE}{Simplified APPLE method with user specified late separation time}
  \item{FH(rho,gamma)}{Fleming-Harrington with user specified pairs of \code{rho} and \code{gamma}}
  }
