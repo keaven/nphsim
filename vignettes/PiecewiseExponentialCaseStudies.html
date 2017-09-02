@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Keaven Anderson" />
+
+
+<title>Piecewise Exponential Fits to Test Cases</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Piecewise Exponential Fits to Test Cases</h1>
+<h4 class="author"><em>Keaven Anderson</em></h4>
+<h4 class="date"><em>August 9, 2017</em></h4>
+
+
+
+<p>We fit initial piecewise exponential distributions to fit case studies for non-proportional hazards. There are 6 test cases that are divided into 5 sections below: 2 cases with delayed benefit, one cure model with proportional hazards, one belly shaped difference (expanding and then coming together), one with increasing treatment effect over time (widening), and one with crossing survival function. Each dataset is in an R dataset in the data directory of the package (Ex1delayedEffect, Ex2delayedEffect, Ex3curewithph, Ex4belly, Ex5widening, Ex6crossing), each with a corresponding help file. In each file, there is a suggested fit using the piecewise exponential distribution. Below, we re-derive these fits and compare the results to the Kaplan-Meier curves for each dataset. We also do a likelihood ratio test for any treatment effect and compare to the logrank test.</p>
+<div id="delayed-benefit-cases-1-and-2" class="section level2">
+<h2>Delayed benefit: cases 1 and 2</h2>
+<p>We begin with Kaplan-Meier curves for test cases 1 and 2 using the survminer package function ggsurvplot. Note that the data structure for each test case is exactly the same as seen below. The function <code>ggsurvplot</code> is from the <code>survminer</code> package available at CRAN.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit1 &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(month, evntd) ~<span class="st"> </span>trt,
+               <span class="dt">data =</span> Ex1delayedEffect)
+fit2 &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(month, evntd) ~<span class="st"> </span>trt,
+               <span class="dt">data =</span> Ex2delayedEffect)
+Ex1KMPlot&lt;-<span class="kw">ggsurvplot</span>(fit1, <span class="dt">data =</span> Ex1delayedEffect, <span class="dt">risk.table =</span> <span class="ot">TRUE</span>, <span class="dt">break.time.by=</span><span class="dv">3</span>)
+Ex2KMPlot&lt;-<span class="kw">ggsurvplot</span>(fit2, <span class="dt">data =</span> Ex2delayedEffect, <span class="dt">risk.table =</span> <span class="ot">TRUE</span>, <span class="dt">break.time.by=</span><span class="dv">3</span>)
+Ex1KMPlot</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Ex2KMPlot</code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAkAAAAHgCAMAAAB6sCJ3AAABEVBMVEUAAAAAADoAAGYAOpAAZrYAs5oAv8QAv88Av9gAyuIzMzM4v8Q6AAA6ADo6AGY6OgA6Ojo6OmY6ZmY6kLY6kNs6v8Q6v9g64PVjj21jv8Rkv8RmAABmADpmOgBmZgBmtttmtv9mv8Rmv89m6v+QOgCQZgCQkLaQ27aQ2/+Q4NiQ9P+xqMS2ZgC2Zma2tv+21cS2/7a2///Vdm3bkDrbtmbbtrbb25Db/9vb/+zb///4dm34dof4dov4dqD4gpr4j7n4ptH5dm35dof5vej7dm37dof71P/8j238pm38vaD86f/8///+vYf+/9H+////tmb/1KD/25D/6bn/6tj/9OL//7b//9H//9v//+j//+z///+B4O3eAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAdKUlEQVR4nO2dC5vcRlaG257JgJNJCMuYBCZsOmQChlXYeAXsuoF4Q4IJl43SjieD9f9/CKqbVFVSt1TnlC4lfe/zxOme6T4tdb1T98uuBIDBbu4LAGkDgQALCARYQCDAAgIBFhAIsIBAgAUEAiwgEGABgQALCARYQCDAAgIBFhAIsIBAgAUEAiwgEGABgQALCARYQCDAAgIBFhAIsNioQA93u93uMuANr795NSzs4+fOT948/XxI+OMHz/tftEg2KlB2KVL70k+40+nYEsi81HlLFTZztfQF6nxbeX/7GAKlxP0nz0qZiHEFEmG9EIMEyne/QA6UFCLzEdzf7h49O/7pXz1+XogiTT4tC6d0O7Rw3lm99tEz8Y6KvbBCuVmWVy1Ovq38pxcowhKjSkgpiUi44/W+er4viypphQHqoXnlCYHqd9pJ3y9Q59tK1IFSpHJI1YGO76skr5LepKOxQPHzd1qdlz80PzTvPCVQxdvPtDpPXpx9WwmB0qRKSJmeIvGO16JQsR56r+2sA5n/uoowTVcdyH9bCYFSo5CNnoe7fZ2eVaagcyD90HvHWYEMAyvR/ttKCJQaD3cXVamSX7wwpYkwKqtyoOqpfui9oy2QfqcpACUDmvFdb4NA6ZFVZUcl0cOdKnhEx+Kf3e3FU/3Qe31LIOudzWurelVPR2Ln2yAQ2CwQCLCAQIAFBAIsIBBgAYEACwgEWEAgwAICARYQCLCAQIAFBAIsIBBgAYEACwgEWEAgwAICARYQCLCAQIAFBAIsIBBgAYEACwgEWEAgwAICARYQCLCAQIAFBAIsogkEE7cJBAIsIBBgAYEACwgEWEAgwAICARbD0t3awq8we+AW7ma4EGibDEp36ywQsYe73Me9fhASCKyOIele5TVGoIe7m1LuZls/CAkE1seAdC92N4URSBzzUJb54+f1g/OBxEb/zfkSYH0MyzgageT+2NXT+oEMIuh84xUMWjmBAqlaT/Vv/aA3kDimBgKtlikEEpkQ5xrBgolShJ0P1ByWBdZHqECBlWgNBFotgQIRm/EQaLUECkTsSFQtsQP1IsFyCRBInVSbmxGMPGAow7TmyZcJlspEg6nSoI8PsT4MLIbpRuMh0CqBQIDFlAKhO3GFTCNQ1wnqYBVAIMBiuiLszVOMaKyQKQX6+OrqHf/0bJA4Uwr0+eHqnQMEWheTClRevfMbdEevi4mX9bzzm1/BoFUxoUA/f3dQvPwh1oeC2YFAgMXERdhrFGErY3qBMKSxKqYW6JtfYY79qphcoFdyfmKsTwVzM8fuHBBoRUAgwGIegb5+7+NYnwvmZTaBDrE+GMzKPAJdYbXqWphlizsYtB6mF6ienQiB1gAEAiycdL//h0iB+hBzg0oYtAZcgW53u8tTrwwJ1IcU6ACDVoCX7oXYrK7Zs4Ue6DxKoAMESp92uotsyNk2gRroDBBoNXSl+8OdyIdu+IHOA4HWQDvdRSl28aLMAmtDhOYcKkErwE/3vM57srCqEKU/QBgkSzOQLE66y7Jrr59MIdABAqWO14wnNcDagQYiBEKHYtp4AunsJzD3aQUayOFQwqDEmVWgt3+BUY3UadL9eL1ruAjehoUpEAxKFCvdM0ug/el39AcaTlWG6Uo0DEqU7iKMG2goECh55j0zFQIlT53u97eXahhsRxtPhUDbZHaBNBAoUeYuwg76EQRKlJnPja8NQks+UawizGrFu0WYdUJ8UTfz1evZpzZbWRAMSpEBAvkHO8nqkj67sCNQGIdDvW8rBEqR/nRvHS2nziksvHo2BNom/eneOtzyeC2Myr35ZmSBUI9Omv5mfOt4XTXSmn3YTHs9fW58PwerHk0MAWakXyD/gO/72xv5rxhvzW7agQJwt92EQCnSn+6+QHZ9etCx36eBQOkzoA7kFWGZNdVD1Y8GBurm9TcHfSAvBEoRP92z1ooerxKtSjDzu6YtTxfolTYIAqWIm+6mEmTPJ/Oa8TrTUf9jFmGC16oZD4ESxU13tRjs4c5ZE+Z2JJpH0ihmJVpQC4RlhkniTShTWc/DndNLqE+I1+fGm19l7sRF7qAaBEoTTyCd80w0qd4FAqWIV4SZHCh8kxcItE38SrQ0iJABQaCNMmQ6R1ggMhAoRSAQYDHzjEQbNMNS5ES6fzlDDgSBUsRL92zGIgyHsKSIm+65qQMF7m/XCkQCAiWIt8HUo2difDQP32MzSmUKZVh6tHqi5fr4bI6ORAiUIi2B5OC7P2M+NBARCJQeXhF2qXIfCAQG4k/n2MsK0CyDqRAoRdx0P17v9nKnMtSBwDC8dBdtsIKywx0E2igLGsqAQCkCgQCL/lUZxEAUIFB69K/KIAWiAYHSY8CqDEogGhAoPYasyggPRAQCpceCVmVAoBRZ0KoMCJQiC1qVAYFSZEGT6iFQiixKIMyKTo9F9URDoPRYmkA4QDUxOocywttgEGirdA9lzNQKg0Dp4Q9liGb8w908y3rK8mtUglLDmxNtOhKnOTPV4e1n+vTUJ+EjuWA2ljOUAYGSZDk5kOANzuxJjRN1oHnGwso378GgxFhUK6x88/TjA1bIJ8Wi+oHkCbwQKCkW1RMtMQLp45zBsumsRLMDcdBtMQiUBt3NeG4gFlcdRAsOIuOme2HvPc8JxEKf3QODUsDLgeadD2Q4/Otfup2KEGixQCDAYki6W+fGW8fF2z8dGGgo8ihnuxKNMmyxDEh357in+og5/zT5uAJVfG23wmDQUulfG+8eOGf2LmudJh9NIHOQ6tfvfVyfCK7r1LE+AsSjf228e+SlOS6+dZr8OAId6h/DoGXiD6aKfMWdUOYeumuOi2+dJh+zCDPHGJaWQCWq0ovEa4UpcZweaefY7/q4eOenMteKeVWnBEI2tDg8gXQ/oj2hzD83vpQZT+unEwgEgxZIe5vf0suBWoWVrABNVYQdPIdQGVoY/i6tan8gO7tpVZelU+NVoh1g0NI50RNt9UY7Dfb6uPjxmvE+LYFKOLQg+gVyuwzr4+LH7Eh06BIIBi2GIenunBtfHxefjzeU4XDoKsZKa7h+rA8GQ1jejMQWvQZdXWHy2WwkIJCgsxzTCIMg0FysQCCTF416AeAEqxAIBs1H+gLVS6KvsCR6BtYkELKgGVjUHomnOZxqiilkKwwCzUEiAvUYpAWCQdOTSBGmOC8QDJqDE+n+5dJyIEmPQCjEZsBL92ypRZikpzEPgWbATffc1IFm2iOxh36BoNDUeBPKHj0TM8Vye5SUEmgk+gSCQdPT2lxBTmvNZtqhrI9eg+wR1gmuB7QFkjPFimXWgQYIBIMmpj0nWuQ+CQtUA40mwV8XtpcVoJlOLOwlRCAYNAn+pPrdvvqPskvi8gRSQKBx8dJdtMGK2Y797uXMcNgpkAmNS1JDGTBoeSQmkCjEzKrD4aAyNB7dS5u5gcaDJBAMGo/WujBCJ3Q70HjQBJJAoDHw0v3hbkeqQk8oUM/csjPAoBFop7ucWbbQZny9+xTJIAg0Ap3pfn+70I5ErkAwKDoncqBlTudQyDoQsQyDQbFJrQ5UcgRCIRafViuMcFRYO9CoaIEopRgEik5q/UCl2b6MZBBmekQntZ5oG1IW5BuEjT14WOvCLhdzVsZAOD1CtUYQiEfKAkUxCALxSLkIU9DaYxLMfuWzaYHeXrnEu6jtkGArzIMjkNnY4wkMopLaaHwbhkACqw4EgQgk2BPtoSvS1EkeHQKhXh1AYqPxXSiDINA8JDYafwoINBcJjsZ3Qe4QsrlqEePSVk76daDSmiX08gdWHBgUToKj8W1iCVTaLfsXXUJBLJ/0+4E0VR2IXYZpmjoQDOrF21yhs/SyT4iXZZyoITUHyHcEmoFRBDoFBKppbe/Sxj7YSZ5Flwtv6gPkuwLNgBToECXUcIHQXvPSvdi1y7COA+fEQYX+DjALEIiy8LkLCBTAiQPnLDs6jrwU+VHuZVZzCySJVYj1gVpRzQCB2ofuiu2DzAHynYHmYiqBYFBNf7q3j/0uKnHqA+RlkNjnxlPhrFsNxWnwC6W2WZoRBCqattdYx36TmdAgCCQJL8IKq+BS9aN2oLmZqihzBtK2WYYFV6Jzu+JjteUXKBB1fHU4lkBvNmpQZ7pndn+ie0J8rhv69QHyZwPNxcQCeaWZ87u105nuyhmD3ZF4vDa/qQ+QPxdoLg4O430OBDqR7k4WZJ8brw/TEE/rA+TPBZqLqQxqePP09MDZmhv6JwRKbUJZC2uAfhqLqgxnkwZ1pntBmBK0XIEY6w8DcEqszjKtdwg2yULvRCsstRmJnTiV6EUIdD4nWpFA4XPqNy9Qiw4degxKX6BFBIrH4gQyrKmmBIHG4lx+siKDrHR/uBNtL1GMUWbVL1Agh0UJ1MaqNXUKtNjirUn3ypxHz3Q1aKmHrTCYqDuIw7mzpxMQSE5UVUNd2TpaYS7LN6gWKAn0RdfpribUm2Is+X6gDlIRKBGD9EU7O5SJsS6pTvo90R0kI5BPd6/SQvAE0pN9VirQZANjcUlDIFWEZXLU/cT6sGGBlkuyBpVJVKLFgbu6BDtep7S9SxiJSpSAQPKwXTlBQxy9ywi0cNI0KAGBZBfQXi1eXsdY2GkgUDTa6V4JRNliAQJtkzWPhZ0GAkUDAgEWWxUo5Sb9otimQO6k+7kvJmk2KpABBnHZuEACLyMafzniqoBAvkEQKAgIZDh0MPc1JQAEqoFBFCCQjbfhNBzqBwLZ+DuWw6BeIJCPV4mGQ+eBQD5+KwwGnQUC+XQ047uq16hvKyCQT1c/EAw6CQSKRIdAK+mSPH8bECgSEIgJBFovEGgK5k7lEYFA0xPxEMU56b8NCDQOECgUCNQClegQIFALCBQCBGoBgUKAQC0gUAgQaJtAIMACAgEWQ9K9UMfzeE+cn0KgrTIg3e3zwponzk+HBQIrpD/dnRML6yfuOYaDAoE10p/uzpmp9RPvJFUItFUGCGSf2lw/cX66mHPjweQEnhtfP2mdJg+BtgkEAiyiFGHDAoE1gko0YIFmPGCBjkTAYki652rQ4uHusnliPRgeCKwPDKYCFhAIsIBAgEU8gcC2iC3QCa2WEWMhl7HGW4FAicVYyGVAoFRjLOQyphIIrB0IBFhAIMACAgEWEAiwgECAxZgCeUsPSeT8GMdr0jnmkS/j+IGYeyfOVN/dsEKI09npN6RiiPshnc3t3oEINqJA/owhCmLKIzNGcfGi+tJ5BmXVJag5mFTub8XkzYe7KlBOTH0VQs8qZl1GmYukIRlk34EMNp5ArTmLBO5vb8w8JN5lWHNvqZdR5pWJVKrMWFxBayJweAh7Hjo1hvpGSUlj3YEKNp5AnC/LgScQ6w9W01qCEhxgd2OlOylQHSKnfxsmBkMgHUjmYDLYiAL56zao5KwirHj81S292qFjKIGItQZzHfUXkRG/ExUi+5BRjdIx6EWYQt/BuAKx/2x1GGbq5yKf5WViJjONJFBBvSEZ4v5WlKQZ9TvRl8Fr35g7SEIgkeEyKh86/2JmhKoSHUeggtyCsktB6v3oXKz693hNltDcQSJFGE9CVQnjNaGqb7yqMH71Ca8oVV8EOf9xvkvy/RTcurx9ByMLFKsSzUv9gt/2NZfxAedWdOrnjALZFoh6PzIGq3Cw7mBcgWI045U6rFzs/pYdQsNpxte1V04xaOUevCKME8O+g3EFitKRmFWJpkwkk/NDyH5Ibn+mSjnOdej6i2yC8yrR9DqQ866RBYoxDCEqH6y6aylbHMxmvBw+YN6KTLlczUcnhtJZBusrsWKQvhPnDsYWCGwACARYQCDAAgIBFhAIsIBAgAUEAiwgEGABgQALCDSYotnaZM+bYrImINBgIFAXECgIiOMDgYKAQD4QKAgjkPx/dvHbOzGoLdbaXaqf8gf+UwMCBeEJ9IWoEH0qtBHeiCWwjEWjaQKBgnAF2lX/VNZU/xbVP1X+I+dgcucvpQUECsIVSO3fr5bqXbw4XutybFNZEAQKwhXIqGME0o38TdWzIVAQgwSKMIE/HSBQEOcF2lgDTAKBgjgnUFWJlqtlttUMg0BBnBPINOP5i7lTAgIFcVYg1ZG4qSo0BAJMIBBgAYEACwgEWEAgwAICARYQCLCAQIAFBAIsIBBgAYEACwgEWEAgwAICARYQCLCAQIBFPIFyM5Wq5zQIeeZdEA9/4//E/4hsW7MAl0RMgfSKutgC6fVWNhBoMUQVyJxFNbpAPhBoNmIK9KFajwCBtkRMgT6900dD3pgkFWkv1v5mYssBvYmFECirV9/JlQyy6MvF2ZS1CHJ++q4+X8IoqV+kHC3q38hPO15Do+mJKdC+kPXotkC/tDexqAT6k3r1S7arN7TIxcvMkgazylOeMe0IJF8kPyJvFhKrEwXhzwxEFajy4aZDIJGRFDtrEwvxu0xYU+hTqEUelNsLqmQgcUjOjVuE6ReJj7i/VXsbyGCPnqmnYGriCiSPom8LtC91covf6wWc8qW67iLP4+o6yy9vCyRf1AikyB79LfyZh7gCVf9ctgVqdkFRApkjq/aqoqPLodZhfma/L1cg+SL1EU3Zlm1vQd9SiCyQyF46KtFdAlWvF+e41RtaOALVap0RSFegRLRsV9Wrtri1wfxEFqhK7Yt/HCZQ9Qrz0Hq/Rp/K11GEWQJpzy5lLNSh5yG2QFXSf6jKF3lm865LIKsOZEljC3R/KwsktWncGYHMSzPZWtvUrhhLIbpAoli60SNjVWO8U6Aquat/ZSus9swTSFW5zxVhx2uZfcmuAyFQ9epNbU64EKILJKSodyz9RXcR9st6H6+s2dOrVYSZHiIR6sb9kKYSrfqTZIFZbGtrsIUQXyC9WalM9lN1oGzXDN2bjXHdVphqYlU1qheyx/DS/RCrJ1rGyXSvJOrRk4P5QIAFBAIsTgr0JeoTYAAtgUz1FRVSMARfoNw0f1AfBUPwBBIDV8f3n5U5unXBIDyBxLj4/W3VVM7QrQuG0CHQw52Y1IM6EBhCqwi7VLkPBAKD8CvRYnhTVICyUIHQobRN/HQ/Xu/2chwrtA4EgbZJK91FG6wgzO+DQNskWrpDoG3SaoXpIXHUgcAgBgj04yv/gXp2OPzLf3cHOn6gp83v1II/1bcdPN2raGZ6UM9Crt9ZkEOYOOyuVeYlRAoRLYZ+6KS7ObPROfjz5+9eeQ8kP1b2/GgZZAWSs1WVg4XRRk9SDbpKOadRL/ihHeNWv7OORUPMNyqYEx6ZlxApRJwYYgWXfuzkQJklUP1tdQv0f//5bfXv97+vf9AEKtRI7PF6bx1hHL56/f5WDMflj5/LVWPiQWAAvd5MhbghhpCowywz1sIh5iVEChElhnMu9akirOb1N4fDyz/8x38dBC9/aH4sbPrff/ufVqDq226uz3wW4TzRwignTSSNztXvLHjlj8p8eOODzEuIFCJKDCcx++cDiYzn5+8qdcQDodNBVH5e/7sovX7sEKi0BTdfenCdXO+j0BRchAjNO71YoahvnScQ8xIihYgSQ/1davrnAymBvvWKMFX90ZWgdyu6BCrMrBBVloSRq8Ubl+YZdX6JeKcbKxhdhLEqQcxLiBQiSgynNtg/H0gJ9OqcQH6gJgfSdWfKH69SRme59KOQi92lF4uAqkQzBeJdQpwQUWKcE6hjPlC3QAOLMB2IUv/M9T4cauEYJ/9xY5EQy0j++X1WynEvIUqIKDHOFWEd84EcgZo60MlKdOkIVKitOQj5R9HcKn29jn5nEeFrY05QiHAJMe4iRoxzleiO+UDdOdCZZrwWyGo8OcqGXWbhb7sQhHlnE4sBb45dhEuIcRcxYpxrxnfMBxIVaC3Qt9Yrz3QkKoFkKNXtQCtyRRQhM6ELQNO808SiofYvYjaAeZcQK0SUGCc7EsvO+UDfH17+QWY+31v9QFXxdXooIzc7AOm6OPG7L3Y7ays7Uj28fmfBWicg+ujZM+x4lxArRLQY+iHmAwEWmA8EWGA+EGDRqkRTRwwh0DbpaMb7/PS5/0Dz5s+teuXp+UCl2goxvBFcz1xhTWHJ1E5XtClJMoCpwGf0SUHWjCb95RBQ76R+m7FjaPyMo93F9Pazz70H9S/+uDuQPx+I2HFez1yRrUZKX6SMUlfnCFOSBPVtOPObwrBmNOkvh4B+J2sYImIMTSsHsvZNVZwS6Kerq26BWvOBaLNP6pkrqlgldgVUN2S0oR2oUd+GO78p8CLqGU0FuT/AvJMzlydmDE2vQG+eXl09+d1f/92V4EnzJ/zT1Uc/dQrUng9E68Kt/0pYAuUXX2iB6P2Rljc0gZpOeefLCYyh38noEI8aQ9Nf9xUZz9vPKnXEA6FTxR/9vfhNt0ClPx/o4e5DSt9VM3NFFWGk8uf4/jMzkEufUGTZy+mO1hdA/+vXHfykbzN+DP2kf1K9Euijdh2oEej8fCCZgYf/6VozV+xtNoMQffZaIHIlyprWVHD6cM2MAqZAxG8zfgz9ZKhAn58TyA/Umg9UEuptzcyVTJpE+d5zsQWwugLWUFZ9G8SMsLRmNDEF0tHIzcG4MYasymAJ1KRbcPulnrmiKi+qTh2G6FU3AvGmxLPLsGZGUxyBqBMUIscYsirDESi0DtRcZfDl1jNX1DspOa41mMoowcqScxsKa0bTmgXqWpVBzoHqpod+EPq91TNX6DmQRGU9pClJZdm+DdrMFPtIB55AxG8zfgz9ZEgr7CMj0Efub84LVM8Hkg8IU1DqmSv0OpBACUQu8N3boGns9CCwW2G0bzN6DP3EEchsJ+8Oxv/66snvZObza7sfqOwvwur5QBltFKGeuZLvGMeBZeRp/SaAfRukL92Z0cQuwojfZvQYCjvd7+Wht6ovEdM5wCCcjEMdfqsOMgn9U4NA28RKdzVkYIqx0Cxo18m73T8OIkKMhVzGqm6lLZBq6aoDclgd/xbv9r9kihgLuYw13kpLIH0YIARaaIyFXEaXQKoIU5Me6DMTuz9m5hgLuYw13opd9xVLenQJxt2CCGyF9ljYXj1irQIGm8FpfYsuoL06TBsZEBhEV/eNPpgbgH7Q/wdYQCDAYkyBigibK0fYoFm0DbhVOv5lqMVUonpJnhYbcU1XvqMOptp3IIKNKJCYQcHdFFQM/HK3WL14wZ1OJjvHyDOKJGoxldgATg85UkOoaZa8y5BzE2jzyew7kMHGE0jNN+HtyiSn3/C2hFSXEWVzZUbfqr1WjngxZj0WZ3MoHUN9o6Skse5ABRtPIOa0twaeQKw/WI2eXUvPCYvdjZXupEB1iJz+bZgYDIF0IJmDyWAjCiRTLsLJh8wNvuXyMuaOXDE2J2y+COo4owqRsdZ0FcwiTKHvYFyB2H+2Ogwz9fOdnBnL3N9QbRUbR6CCekNFM9Emo34n+jJ47RtzB0kIxB3Y1auDmPtrykp0HIEYW15bpSD1fop63wv6Uu/6DhIpwpi7c6umC6sJJecQP/7qE15RalbrMosfCfl+Cv6qjOYORhYoViWal/oFv+1rLoO8sU9zHYwt012BqPcjY7AKB+sOxhUoRjNeqcPKxdRKtxgZIacZX9deWRuNN7kHrwjjxLDvYFyBonQkijU53M2V+SFkPyS3P1OlHOc6imZrFmYlml4Hct41skBRzolkLWBSRNgYWQwfMG9Fphx9y+s6BPMrsWLwl7iNLRDYABAIsIBAgAUEAiwgEGABgQALCARYQCDAAgIBFhBoMEWzt8k+1t4B6QOBBgOBuoBAQUAcHwgUBATygUBBGIHk/7OL396JQe16MwrWssFEgUBBeAJ9ISpEnwpthDf6qIhtbWwCgYJwBdqp0zSrf8W5iFX+I+dgbmtrEwgUhCuQmFaldrUVz/WubswlRKkBgYJwBTLqGIF0I39T9WwIFMQggeJscJsIECiI8wJtrAEmgUBBnBNI7wxIX3maJBAoiHMCmWY8fzF3SkCgIM4KpDoSN1WFhkCACQQCLCAQYAGBAAsIBFhAIMACAgEW/w/U3pUCd4MfDgAAAABJRU5ErkJggg==" /><!-- --></p>
+<div id="piecewise-exponential-fitting" class="section level3">
+<h3>Piecewise exponential fitting</h3>
+<p>For each test case, we use <code>pwexpfit</code> to fit piecewise exponential survival distributions by treatment group. The defaults of 3 intervals of length 3 is used and the routine automatically adds on another interval of indefinite length when there are patients followed for more than 9 months in each case. (PRESUMABLY THESE APPROXIMATE TIMING OF SCANS FOR THESE STUDIES). The variables shown in the table for each interval are as follows:</p>
+<ul>
+<li><code>intervals</code> - interval length,</li>
+<li><code>TTOT</code> - total time on test for all observations in interval,</li>
+<li><code>events</code> - events occuring in interval,</li>
+<li><code>rate</code> - event rate (<code>events / TTOT</code>) in interval,</li>
+<li><code>m2ll</code> - minus 2 times the log-likelihood for given rate, events and time on test (<code>2 *(rate*TTOT-events*log(rate))</code>).</li>
+</ul>
+<p>In test case 1 we can see that event rates are similar in the first 3 months for each treatment group and afterwards are substantially reduced in the experimental group. Within each treatment group, failure rates are reasonably constant after month 3. We show code for the first table printing, but suppress showing code for later analogous table generation statements.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">kable</span>(Ex1Rate1 &lt;-<span class="st"> </span><span class="kw">with</span>(<span class="kw">subset</span>(Ex1delayedEffect,trt==<span class="dv">1</span>), <span class="kw">pwexpfit</span>(<span class="kw">Surv</span>(month,evntd))),
+      <span class="dt">caption=</span><span class="st">&quot;Test case 1 piecewise exponential fit, experimental group&quot;</span>)</code></pre></div>
+<table>
+<caption>Test case 1 piecewise exponential fit, experimental group</caption>
+<thead>
+<tr class="header">
+<th align="right">intervals</th>
+<th align="right">TTOT</th>
+<th align="right">events</th>
+<th align="right">rate</th>
+<th align="right">m2ll</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">620.4375</td>
+<td align="right">64</td>
+<td align="right">0.1031530</td>
+<td align="right">418.75734</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="right">415.8482</td>
+<td align="right">36</td>
+<td align="right">0.0865700</td>
+<td align="right">248.16970</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">256.2053</td>
+<td align="right">19</td>
+<td align="right">0.0741593</td>
+<td align="right">136.85853</td>
+</tr>
+<tr class="even">
+<td align="right">Inf</td>
+<td align="right">205.4186</td>
+<td align="right">13</td>
+<td align="right">0.0632854</td>
+<td align="right">97.76261</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Test case 1 piecewise exponential fit, control group</caption>
+<thead>
+<tr class="header">
+<th align="right">intervals</th>
+<th align="right">TTOT</th>
+<th align="right">events</th>
+<th align="right">rate</th>
+<th align="right">m2ll</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">316.74106</td>
+<td align="right">33</td>
+<td align="right">0.1041861</td>
+<td align="right">215.26408</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="right">189.50899</td>
+<td align="right">35</td>
+<td align="right">0.1846878</td>
+<td align="right">188.23619</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">90.64288</td>
+<td align="right">11</td>
+<td align="right">0.1213554</td>
+<td align="right">68.39871</td>
+</tr>
+<tr class="even">
+<td align="right">Inf</td>
+<td align="right">48.69624</td>
+<td align="right">7</td>
+<td align="right">0.1437483</td>
+<td align="right">41.15568</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="testing-for-treatment-effect" class="section level3">
+<h3>Testing for treatment effect</h3>
+<p>If we fit the same piecewise exponential model with no difference between treatment groups and sum <code>m2ll</code> for that model compared to <code>m2ll</code> for the combined fits by treatment group, we can perform a 4 df Chi-square test for treatment effect. We compare this p-value with a logrank and find they are nearly identical.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Ex1RateAll &lt;-<span class="st">  </span><span class="kw">with</span>(Ex1delayedEffect, <span class="kw">pwexpfit</span>(<span class="kw">Surv</span>(month,evntd)))
+<span class="kw">pchisq</span>(<span class="kw">sum</span>(Ex1RateAll$m2ll)-<span class="kw">sum</span>(Ex1Rate0$m2ll+Ex1Rate1$m2ll),<span class="dt">df=</span><span class="dv">4</span>,<span class="dt">lower.tail=</span><span class="ot">FALSE</span>)</code></pre></div>
+<pre><code>## [1] 0.006424744</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lr1 &lt;-<span class="st"> </span><span class="kw">with</span>(Ex1delayedEffect, <span class="kw">survdiff</span>(<span class="dt">formula =</span> <span class="kw">Surv</span>(month, evntd) ~<span class="st"> </span>trt))$chisq
+<span class="kw">pchisq</span>(lr1,<span class="dt">df=</span><span class="dv">1</span>,<span class="dt">lower.tail=</span><span class="ot">FALSE</span>)</code></pre></div>
+<pre><code>## [1] 0.006718952</code></pre>
+<p>For test case 2, we see a similar pattern below. However, the early event rate where event rates are similar has a higher rate and the drop in rates for the next 6 months is more substantial. An immediate question comes as to which of test cases 1 and 2 has a more impressive treatment effect; a question that will obviously depend on the metric used. The 4 degree of freedom likelihood ratio test p-value in this case is 0.00035 compared to 0.00672 for the logrank test; thus, in this case the non-proportional hazards has clearly left room for a more sensitive test than logrank. In this case, there may be a dropoff in the event rate in both treatment groups late in follow-up, but follow-up there is limited enough that this may be a questionable conclusion.</p>
+<table>
+<caption>Test case 2 piecewise exponential fit, experimental group</caption>
+<thead>
+<tr class="header">
+<th align="right">intervals</th>
+<th align="right">TTOT</th>
+<th align="right">events</th>
+<th align="right">rate</th>
+<th align="right">m2ll</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">308.8478</td>
+<td align="right">62</td>
+<td align="right">0.2007461</td>
+<td align="right">323.10857</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="right">172.2464</td>
+<td align="right">20</td>
+<td align="right">0.1161127</td>
+<td align="right">126.12775</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">114.8007</td>
+<td align="right">12</td>
+<td align="right">0.1045290</td>
+<td align="right">78.19898</td>
+</tr>
+<tr class="even">
+<td align="right">Inf</td>
+<td align="right">244.2830</td>
+<td align="right">11</td>
+<td align="right">0.0450297</td>
+<td align="right">90.20951</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Test case 2 piecewise exponential fit, control group</caption>
+<thead>
+<tr class="header">
+<th align="right">intervals</th>
+<th align="right">TTOT</th>
+<th align="right">events</th>
+<th align="right">rate</th>
+<th align="right">m2ll</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">309.66667</td>
+<td align="right">72</td>
+<td align="right">0.2325081</td>
+<td align="right">354.07157</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="right">122.12320</td>
+<td align="right">33</td>
+<td align="right">0.2702189</td>
+<td align="right">152.36251</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">44.73551</td>
+<td align="right">16</td>
+<td align="right">0.3576577</td>
+<td align="right">64.90173</td>
+</tr>
+<tr class="even">
+<td align="right">Inf</td>
+<td align="right">71.93500</td>
+<td align="right">2</td>
+<td align="right">0.0278029</td>
+<td align="right">18.33046</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="estimating-the-hazard-ratio-over-time" class="section level3">
+<h3>Estimating the hazard ratio over time</h3>
+<p>We can look at the hazard ratio in each interval as follows using the information just created:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># example 1 piecewise hazard ratios</span>
+Ex1Rate1$rate /<span class="st"> </span>Ex1Rate0$rate</code></pre></div>
+<pre><code>## [1] 0.9900847 0.4687372 0.6110917 0.4402517</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># example 2 piecewise hazard ratios</span>
+Ex2Rate1$rate /<span class="st"> </span>Ex2Rate0$rate</code></pre></div>
+<pre><code>## [1] 0.8633942 0.4296988 0.2922599 1.6196071</code></pre>
+</div>
+<div id="model-simplification" class="section level3">
+<h3>Model simplification</h3>
+<p>Now we consider simplifying the piecewise exponential model for test case 1. We assume a common failure rate for the first 3 months across treatment groups and a single rate thereafter. The code has some level of detail as subsetting and recombining is involved; however, no new concepts are introduced, so we do not show the code.</p>
+<table>
+<caption>2-piece exponential fit with HR=1 for first 3 months, test case 1.</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">TTOT</th>
+<th align="right">events</th>
+<th align="right">rate</th>
+<th align="right">m2ll</th>
+<th align="left">Treatment</th>
+<th align="left">Period</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td align="right">937.1785</td>
+<td align="right">97</td>
+<td align="right">0.1035022</td>
+<td align="right">634.0236</td>
+<td align="left">Combined</td>
+<td align="left">&lt; 3 months</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td align="right">328.8481</td>
+<td align="right">53</td>
+<td align="right">0.1611686</td>
+<td align="right">299.4822</td>
+<td align="left">Control</td>
+<td align="left">&gt; month 3</td>
+</tr>
+<tr class="odd">
+<td>21</td>
+<td align="right">877.4721</td>
+<td align="right">68</td>
+<td align="right">0.0774953</td>
+<td align="right">483.8251</td>
+<td align="left">Experimental</td>
+<td align="left">&gt; month 3</td>
+</tr>
+</tbody>
+</table>
+<p>The hazard ratio after the first 3 months is 0.48. The 5 df Chi-square test for improvement of the full model over this 3 parameter model is (<span class="math inline">\(-2\times \hbox{log-likelihood}=\)</span> 1414.6) vs. the full model fit above with piecewise exponential in each treatment group (<span class="math inline">\(-2 \times \hbox{log-likelihood}=\)</span> 1417.33) is 2.73 (<span class="math inline">\(p=\)</span> 0.742). This suggests the simplified model with a common exponential failure rate for the first 3 months followed by an exponential failure rate in each arm with a hazard ratio of 0.48 fits case study 1 reasonably well.</p>
+</div>
+<div id="overlay-of-kaplan-meier-and-simplified-exponential-model-curves" class="section level3">
+<h3>Overlay of Kaplan-Meier and Simplified Exponential Model curves</h3>
+<p>Now we overlay the Kaplan-Meier curve from test case 1 with the simplified piecewise exponential fit.</p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="possible-models-for-design-and-simulations-based-on-examples" class="section level3">
+<h3>Possible models for design and simulations based on examples</h3>
+<p>For test case 1, a reasonable approximation would be a common exponential failure rate of 0.10 per month for the first 3 months followed by an exponential failure rate of 0.16 per month in the control group and 0.08 in the experimental group yielding a hazard ratio of 0.5 after month 3.</p>
+</div>
+</div>
+<div id="cure-with-proportional-hazards-case-3" class="section level2">
+<h2>Cure with proportional hazards: case 3</h2>
+</div>
+<div id="belly-shaped-case-4" class="section level2">
+<h2>Belly shaped: case 4</h2>
+</div>
+<div id="widening-case-5" class="section level2">
+<h2>Widening: case 5</h2>
+</div>
+<div id="crossing-case-6" class="section level2">
+<h2>Crossing: case 6</h2>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
