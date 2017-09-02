@@ -16,7 +16,8 @@ Imports:
   doParallel,
   data.table,
   grid,
-  ggplot2
+  ggplot2,
+  survminer
 Suggests:
   knitr,
   rmarkdown,
