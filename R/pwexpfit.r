@@ -35,6 +35,7 @@
 #' m2ll1 <- sum(rate0$m2ll)+sum(rate1$m2ll)
 #' # as a measure of strength, chi-square examines improvement in likelihood
 #' pchisq(m2ll0-m2ll1,5,lower=FALSE)
+#' 
 #' @export
 pwexpfit <- function(Srv = Surv(time=Ex1delayedEffect$month, event=Ex1delayedEffect$evntd),
                       intervals=array(3,3)){
