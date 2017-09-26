@@ -37,15 +37,15 @@
 #' @import survRM2
 #' @export
 rmst.Stat <- function(survival, cnsr, trt, stra = NULL, fparam = NULL) {
-  idx = arm == 0
-  tt = time[idx]
+  idx = trt == "experimental"
+  tt = survival[idx]
   tau0max = max(tt)
-  idx = arm == 1
-  tt = time[idx]
+  idx = trt == "control"
+  tt = survival[idx]
   tau1max = max(tt)
   tau_max = min(tau0max, tau1max)
   tau <- ifelse(tau_max < fparam, tau_max, fparam)
-  a <- rmst2(time = survival, status = 1 - cnsr, arm = (trt == "experiment"), tau = tau)
+  a <- rmst2(time = survival, status = 1 - cnsr, arm = (trt == "experimental"), tau = tau)
   b <- a$unadjusted.result
   pval <- ifelse(sign(b[1, 1]), b[1, 4]/2, 1 - b[1, 4]/2)
   y <- list(pval = pval, tau = tau, est = b[1, 1], estlb = b[1, 2], estub = b[1, 3])

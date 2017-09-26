@@ -39,7 +39,7 @@
 #' @export
 #' @import survival
 wkm.Stat <- function(survival,cnsr,trt,stra=NULL,fparam=NULL){
-  indata<-data.table(Event.T=survival,Status=1-cnsr,Z=(trt=='experiment'))
+  indata<-data.table(Event.T=survival,Status=1-cnsr,Z=(trt=='experimental'))
   data.g1 <- indata[Z==1, ]
   data.g2 <- indata[Z==0, ]
   n1 <- data.g1[,.N]
