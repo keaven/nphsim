@@ -47,7 +47,7 @@ rmst.Stat <- function(survival, cnsr, trt, stra = NULL, fparam = NULL) {
   tau <- ifelse(tau_max < fparam, tau_max, fparam)
   a <- rmst2(time = survival, status = 1 - cnsr, arm = (trt == "experimental"), tau = tau)
   b <- a$unadjusted.result
-  pval <- ifelse(sign(b[1, 1]), b[1, 4]/2, 1 - b[1, 4]/2)
+  pval <- ifelse((b[1, 1])>=0, b[1, 4]/2, 1 - b[1, 4]/2)
   y <- list(pval = pval, tau = tau, est = b[1, 1], estlb = b[1, 2], estub = b[1, 3])
   return(y)
 }
