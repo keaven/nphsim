@@ -45,8 +45,9 @@ test.lr <- function(surv, cnsr, trt, stra = NULL) {
     lr <- survdiff(Surv(surv, 1 - cnsr) ~ trt + strata(stra))
     cox <- coxph(Surv(surv, 1 - cnsr) ~ trt + strata(stra))
   }
-  trt_better <- sign(lr$obs[2] - lr$exp[2])
-  pval <- ifelse(sign(trt_better), (1 - pchisq(lr$chisq, length(unique(trt)) - 1))/2, pchisq(lr$chisq, length(unique(trt)) - 1)/2)
+  ## lr$obs[2] - lr$exp[2]: experimental arm observed number of events minus expected (<0 means experimental arm is better)
+  csp <- pchisq(lr$chisq, length(unique(trt)) - 1, lower.tail = FALSE)
+  pval <- ifelse((lr$obs[2] - lr$exp[2])<=0, csp/2, 1-csp/2)
   y <- list(pval = pval, z = sign(lr$obs[2] - lr$exp[2]) * sqrt(lr$chisq), hr = exp(cox$coefficients), sehr = sqrt(diag(cox$var)))
   return(y)
 }
