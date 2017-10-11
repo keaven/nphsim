@@ -4,7 +4,7 @@
 \alias{test.lr}
 \title{LR Test Statistic}
 \usage{
-test.lr(surv, cnsr, trt, stra = NULL)
+test.lr(surv, cnsr, trt, stra = NULL, fparam = NULL)
 }
 \arguments{
 \item{cnsr}{censoring variable: 1=censoring, 0=event}
