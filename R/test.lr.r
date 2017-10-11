@@ -36,7 +36,7 @@
 #' 
 #' @import survival
 #' @export
-test.lr <- function(surv, cnsr, trt, stra = NULL) {
+test.lr <- function(surv, cnsr, trt, stra = NULL,fparam=NULL) {
   ## logrank test p-value
   if (is.null(stra)) {
     lr <- survdiff(Surv(surv, 1 - cnsr) ~ trt)
