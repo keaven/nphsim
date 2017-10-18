@@ -64,9 +64,13 @@
 #'  }
 #'  
 #' @examples
-#' # Use a gsSurv object as both input for simulation and testing. A logrank p-value and HR from cox model is reported.
+#' # Use a gsSurv object as both input for simulation and testing. 
+#' # A logrank p-value and HR from cox model is reported.
 #' library(gsDesign)
-#' gs <- gsSurv ( k = 3, test.type = 4, alpha = 0.025, beta = 0.05, timing = c( 0.5,0.75 ), sfu = sfHSD , sfupar = c( -4 ), sfl = sfHSD, sflpar = c( -12 ), lambdaC = log(2) / 6, hr = 0.65, hr0 = 1, eta = 0.01, gamma = c( 2.5,5,7.5,10 ), R = c( 2,2,2,6 ) , S = NULL , T = 15 , minfup = 3 , ratio = 1) 
+#' gs <- gsSurv (k = 3, test.type = 4, alpha = 0.025, beta = 0.05, timing = c( 0.5,0.75 ), 
+#'               sfu = sfHSD , sfupar = c( -4 ), sfl = sfHSD, sflpar = c( -12 ), 
+#'              lambdaC = log(2) / 6, hr = 0.65, hr0 = 1, eta = 0.01, 
+#'              gamma = c( 2.5,5,7.5,10 ), R = c( 2,2,2,6 ) , S = NULL , T = 15 , minfup = 3 , ratio = 1) 
 #' sim1 <- nphsim(nsim=10,d=gs)
 #' test1 <- simtest(x=sim1,anatype='event',method='LR', d=gs)
 #' test1$result
@@ -85,7 +89,8 @@
 #' # specify number of events
 #' test4 <- simtest(x=sim1,anatype='event',anaD=c(140, 200, 290), method='LR', d=gs)
 #'
-#' # A user defined testing function. Additional information needed for the testing function can be included in the fparam 
+#' # A user defined testing function. Additional information needed for the testing function 
+#' # can be included in the fparam. 
 #' # and provided in the \code{simtest() fparam} parameter.
 #' library(survRM2)
 #' test.usr1<-function (survival,cnsr,trt,stra=NULL,fparam=NULL) {
