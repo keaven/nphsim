@@ -69,8 +69,8 @@ unless a gsSurv object is provided, in which case the individual parameter can b
 overwrite the corresponding value from the gsSurv object.
 }
 \examples{
-# Simulate a two-arm study with overall survival endpint using proportional harzard of 0.7 and median survival of 6 months. 
-# The number of subjects in each arm is 300.
+# Simulate a two-arm study with overall survival endpint using proportional harzard of 0.7 
+# and median survival of 6 months. The number of subjects in each arm is 300.
 library(survival)
 medC = 6 
 hr <- 0.7
@@ -78,17 +78,20 @@ intervals <- NULL
 gamma <- c(2.5, 5,  7.5,  10) ## a ramp-up enrollment
 R     <- c(2  , 2,  2  ,  6 ) ## enrollment period: total of 12 months
 eta <- -log(0.99) ## 1\% monthly dropout rate
-sim1<-nphsim(nsim=10,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
+sim1<-nphsim(nsim=10,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,
+             intervals=intervals,gamma=gamma, R=R,eta=eta)
 km<-survfit(Surv(survival,1-cnsr)~treatment,data=sim1$simd[sim==1])
 plot(km,xlab="Month Since Randomization",ylab="Survival",lty=1:2,xlim=c(0,36),mark.time=TRUE)
 ll <- gsub("x=","",names(km$strata))  ## legend labels
 legend("top",legend=ll,lty=1:2,horiz=FALSE,bty='n')
  
 
-# Simulate survival endpoint with delayed separation of KM curve: HR=1 for the first 3 months and 0.65 afterwards 
+# Simulate survival endpoint with delayed separation of KM curve: HR=1 for the 
+# first 3 months and 0.65 afterwards 
 hr <- c(1,0.65)
 intervals <- 3 
-sim2<-nphsim(nsim=10,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
+sim2<-nphsim(nsim=10,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,
+             intervals=intervals,gamma=gamma, R=R,eta=eta)
 km<-survfit(Surv(survival,1-cnsr)~treatment,data=sim1$simd[sim<=10])
 plot(km,xlab="Month Since Randomization",ylab="Survival",lty=1:2,xlim=c(0,36))
 ll <- gsub("x=","",names(km$strata))  ## legend labels
@@ -97,6 +100,9 @@ legend("top",legend=ll,lty=1:2,horiz=FALSE,bty='n')
 
 # Use gsSurv as input
 library(gsDesign)
-gs <- gsSurv ( k = 3, test.type = 4, alpha = 0.025, beta = 0.05, timing = c( 0.5,0.75 ), sfu = sfHSD , sfupar = c( -4 ), sfl = sfHSD, sflpar = c( -12 ), lambdaC = log(2) / 6, hr = 0.65, hr0 = 1, eta = 0.01, gamma = c( 2.5,5,7.5,10 ), R = c( 2,2,2,6 ) , S = NULL , T = 15 , minfup = 3 , ratio = 1) 
+gs <- gsSurv ( k = 3, test.type = 4, alpha = 0.025, beta = 0.05, timing = c( 0.5,0.75 ), 
+               sfu = sfHSD , sfupar = c( -4 ), sfl = sfHSD, sflpar = c( -12 ), 
+               lambdaC = log(2) / 6, hr = 0.65, hr0 = 1, eta = 0.01, gamma = c( 2.5,5,7.5,10 ), 
+               R = c( 2,2,2,6 ) , S = NULL , T = 15 , minfup = 3 , ratio = 1) 
 sim3 <- nphsim(nsim=10,d=gs) 
 }

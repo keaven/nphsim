@@ -58,11 +58,14 @@ intervals <- 3
 gamma <- c(2.5, 5,  7.5,  10) ## a ramp-up enrollment
 R     <- c(2  , 2,  2  ,  6 ) ## enrollment period: total of 12 months
 eta <- -log(0.99) ## 1\% monthly dropout rate
-sim1 <- nphsim(nsim=2,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
-test1 <- simtest(x=sim1, anaD=c(250,300), method=wlr.Stat,fparam=list(rho=c(0,0,1), gamma=c(0,1,1), wlr='FH(0,1)', APPLE=3))
+sim1 <- nphsim(nsim=2,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,
+               intervals=intervals,gamma=gamma, R=R,eta=eta)
+test1 <- simtest(x=sim1, anaD=c(250,300), method=wlr.Stat,fparam=list(rho=c(0,0,1), 
+                 gamma=c(0,1,1), wlr='FH(0,1)', APPLE=3))
 test1$result[]
 
 # direct function call (without cutoff)
-wlr.Stat(surv=sim1$simd$survival, cnsr=sim1$simd$cnsr, trt=sim1$simd$treatment,fparam=list(rho=c(0,0,1), gamma=c(0,1,1), wlr='FH(0,1)', APPLE=3))
+wlr.Stat(surv=sim1$simd$survival, cnsr=sim1$simd$cnsr, trt=sim1$simd$treatment,
+         fparam=list(rho=c(0,0,1), gamma=c(0,1,1), wlr='FH(0,1)', APPLE=3))
 
 }

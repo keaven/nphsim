@@ -47,7 +47,8 @@ intervals <- 3
 gamma <- c(2.5, 5,  7.5,  10) ## a ramp-up enrollment
 R     <- c(2  , 2,  2  ,  6 ) ## enrollment period: total of 12 months
 eta <- -log(0.99) ## 1\% monthly dropout rate
-sim1 <- nphsim(nsim=1,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,intervals=intervals,gamma=gamma, R=R,eta=eta)
+sim1 <- nphsim(nsim=1,lambdaC=log(2)/medC,lambdaE=log(2)/medC*hr, ssC=300,ssE=300,
+               intervals=intervals,gamma=gamma, R=R,eta=eta)
 test1 <- simtest(x=sim1, anaD=c(250,300), method=wkm.Stat)
 test1$result[]
 
