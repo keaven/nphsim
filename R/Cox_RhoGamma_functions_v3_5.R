@@ -47,16 +47,6 @@ if(!is.null(t.tau)){
   return(wt)
 }
 
-LS.int.S.wt<-function(fatx,x,wt=rep(1,length(x)),L=Inf){
-  nx<-length(fatx)
-  f<-fatx[-c(nx)]
-  d.x<-diff(x)
-  wt2<-wt[-1]
-  wt.suppL<-ifelse(x[-1]<=L,wt2,0)
-  int.f<-x[1]*wt[1]+sum(d.x*f*wt.suppL)
-  return(int.f)
-}
-
 
 N.rhogamma2<-function(x,error,weight=rep(1,length(error))){
 sum(weight*(error<=x))
@@ -71,7 +61,18 @@ R.rhogamma<-function(x,error,b){
 sum(exp(b)*(error>=x))
 }
 
-cox.score.rhogamma<-function(beta,time,delta,z,rho,gamma,km.pool,t.tau=NULL,w0.tau=0,w1.tau=1,normalize=FALSE){
+R.rhogamma2<-function(x,error,b,z){
+  sum(exp(z*b)*(error>=x))
+}
+
+E.rhogamma<-function(x,error,b,z){
+  sum(exp(z*b)[which(error==x)])
+}
+
+
+
+# This version removes the "normalize" option in prior versions
+cox.score.rhogamma<-function(beta,time,delta,z,rho,gamma,km.pool,t.tau=NULL,w0.tau=0,w1.tau=1){
 is.sorted<-!is.unsorted(time)
 if(!is.sorted){
 id<-order(time); time<-time[id]; delta<-delta[id]; z<-z[id]
@@ -80,14 +81,6 @@ at.points<-time
 
 S.pool<-summary(km.pool,c(time))$surv
 wt.rg<-wt.rg.S(S=S.pool,rho=rho,gamma=gamma,tpoints=time,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
-
-
-if(normalize){
-L<-max(time[which(delta==1)])
-wt.norm<-LS.int.S.wt(fatx=wt.rg,x=time,L=L)
-# normalize the weights
-wt.rg<-L*wt.rg/wt.norm
-}
 
 # Control group
 # Risk and Counting processes
@@ -119,8 +112,33 @@ return(score)
 
 
 
+cox.plik.rhogamma<-function(beta,time,delta,z,rho,gamma,km.pool,t.tau=NULL,w0.tau=0,w1.tau=1){
+  is.sorted<-!is.unsorted(time)
+  if(!is.sorted){
+    id<-order(time); time<-time[id]; delta<-delta[id]; z<-z[id]
+  }
+  
+at.points<-sort(unique(time[which(delta==1)]))
 
-cox.rhogamma<-function(time,delta,z,rho,gamma,t.tau=NULL,w0.tau=0,w1.tau=1,details=FALSE,normalize=FALSE){
+S.pool<-summary(km.pool,c(at.points))$surv
+wt.rg<-wt.rg.S(S=S.pool,rho=rho,gamma=gamma,tpoints=at.points,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
+
+counting<-unlist(lapply(as.list(at.points),N.rhogamma,error=time,delta=delta))
+dN<-diff(c(0, counting))
+dN.rg<-c(wt.rg)*dN
+
+risk<-unlist(lapply(as.list(at.points),R.rhogamma2,error=time,b=beta,z=z))  
+lz<-unlist(lapply(as.list(at.points),E.rhogamma,error=time,b=beta,z=z))  
+
+dN.lik<-dN.rg*c(log(lz)-log(risk))
+loglik<-sum(dN.lik)
+return(loglik)
+}
+
+
+
+
+cox.rhogamma<-function(time,delta,z,rho,gamma,t.tau=NULL,w0.tau=0,w1.tau=1,details=FALSE,est.method="score"){
 # x must be a treatment indicator
 n<-length(time)
 n0<-sum(z==0)
@@ -133,14 +151,61 @@ id<-order(time); time<-time[id]; delta<-delta[id]; z<-z[id]
 # Pooled KM at observed time points for weighting
 km.pool<-survfit(Surv(time,delta)~1)
 
-get.Cox<-uniroot(f=cox.score.rhogamma,interval=c(-12,12),extendInt="yes",
-                 time=time,delta=delta,z=z,rho=rho,gamma=gamma,km.pool=km.pool,
-                 t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau,normalize=normalize)
 
+n.ties<-length(time[which(delta==1)])-length(unique(time[which(delta==1)]))
+
+if(est.method=="plik" & n.ties>0){
+  cat("Note that PL maximization is not avaiable for weighting in presence of ties:  Setting estimation method to 'score'","\n")
+  est.method<-"score"
+}
+
+if(est.method=="score"){
+  
+# Solve score directly
+  
+get.Cox<-uniroot(f=cox.score.rhogamma,interval=c(-15,15),extendInt="yes",tol=10^-16,
+                 time=time,delta=delta,z=z,rho=rho,gamma=gamma,km.pool=km.pool,
+                 t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
+if(details){
+print(get.Cox)
+print(exp(get.Cox$root))
+# Check score at 2 points
+b2<-jitter(get.Cox$root)
+score1<-cox.score.rhogamma(beta=get.Cox$root,time=time,delta=delta,z=z,rho=rho,gamma=gamma,km.pool=km.pool,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
+score2<-cox.score.rhogamma(beta=b2,time=time,delta=delta,z=z,rho=rho,gamma=gamma,km.pool=km.pool,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
+cat("rho,gamma=",c(rho,gamma),"\n")
+cat("Score at soln1: beta,score=",c(get.Cox$root,score1),"\n")
+cat("Score at b: b,score=",c(b2,score2),"\n")
+}
 bhat.rhogamma<-get.Cox$root
+}
+
+if(est.method=="plik"){
+
+get.Cox<-optimize(f=cox.plik.rhogamma,interval=c(-15,15),maximum=TRUE,
+                  time=time,delta=delta,z=z,rho=rho,gamma=gamma,km.pool=km.pool,
+                  t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
+if(details){
+print(get.Cox)
+print(exp(get.Cox$maximum))
+}
+bhat.rhogamma<-get.Cox$maximum
+}
+
+# lik(beta=0)
+if(details){
+cat("Note: PL calculations are only valid for weighting if NO ties","\n")  
+l0<-cox.plik.rhogamma(beta=0,time=time,delta=delta,z=z,rho=rho,gamma=gamma,km.pool=km.pool,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
+l1<-cox.plik.rhogamma(beta=bhat.rhogamma,time=time,delta=delta,z=z,rho=rho,gamma=gamma,km.pool=km.pool,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
+likr<-c(-2*(l0-l1))
+cat("rho,gamma=",c(rho,gamma),"\n")
+cat("lik0,lik(beta),lik ratio=",c(l0,l1,likr),"\n")
+}
+
 # u(beta=0)
-u.zero<-cox.score.rhogamma(beta=0,time=time,delta=delta,z=z,rho=rho,gamma=gamma,km.pool=km.pool,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau,normalize=normalize)
-return(list(bhat=bhat.rhogamma,u.beta=get.Cox$f.root,u.zero=u.zero))
+u.zero<-cox.score.rhogamma(beta=0,time=time,delta=delta,z=z,rho=rho,gamma=gamma,km.pool=km.pool,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
+u.beta<-cox.score.rhogamma(beta=bhat.rhogamma,time=time,delta=delta,z=z,rho=rho,gamma=gamma,km.pool=km.pool,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
+return(list(bhat=bhat.rhogamma,u.beta=u.beta,u.zero=u.zero))
 }
 
 
@@ -148,7 +213,7 @@ return(list(bhat=bhat.rhogamma,u.beta=get.Cox$f.root,u.zero=u.zero))
 
 
 cox.rhogamma.resample<-function(bhat,time,delta,z,G1.draws=NULL,G0.draws=NULL,
-                                draws=0,rho=0,gamma=0,details=FALSE,t.tau=NULL,w0.tau=w0.tau,w1.tau=w1.tau,normalize=FALSE,seed.value=8316951){
+                                draws=0,rho=0,gamma=0,details=FALSE,t.tau=NULL,w0.tau=w0.tau,w1.tau=w1.tau,seed.value=8316951){
 # The G0.draws and G1.draws will be the same used from max combo test
 if(!is.null(G1.draws) & is.null(G0.draws)) stop("G1.draws and G0.draws should be of same dimensions")
 if(!is.null(G0.draws) & is.null(G1.draws)) stop("G1.draws and G0.draws should be of same dimensions")
@@ -172,13 +237,6 @@ at.points<-time
 km.pool<-survfit(Surv(time,delta)~1)
 S.pool<-summary(km.pool,c(time))$surv
 wt.rg<-wt.rg.S(S=S.pool,rho=rho,gamma=gamma,tpoints=time,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
-
-if(normalize){
-L<-max(time[which(delta==1)])
-wt.norm<-LS.int.S.wt(fatx=wt.rg,x=time,L=L)
-# normalize the weights
-wt.rg<-L*wt.rg/wt.norm
-}
 
 tt<-time[which(z==0)]
 dd<-delta[which(z==0)]
@@ -318,8 +376,8 @@ return(out)
 
 
 
-fit.cox.rhogamma<-function(time,delta,z,rho,gamma,t.tau=NULL,w0.tau=0,w1.tau=1,draws=0,
-                           details=FALSE,normalize=FALSE,seed.value=8316951,G1.draws=NULL,G0.draws=NULL,
+fit.cox.rhogamma<-function(time,delta,z,rho,gamma,t.tau=NULL,w0.tau=0,w1.tau=1,draws=0,est.method="score",
+                           details=FALSE,seed.value=8316951,G1.draws=NULL,G0.draws=NULL,
                            alphaL=0.025,alphaU=0.025,alphaU.adj=NULL,checking=TRUE){
 if(is.null(alphaU.adj)) alphaU.adj<-alphaU
 if(!is.null(G1.draws) & is.null(G0.draws)) stop("G1.draws and G0.draws should be of same dimensions")
@@ -329,14 +387,14 @@ if(!is.null(G0.draws) & !is.null(G1.draws)){if (ncol(G1.draws)!=ncol(G0.draws)) 
   
 if(!is.null(G1.draws)) draws<-ncol(G1.draws)
 
-fit.rg<-cox.rhogamma(time=time,delta=delta,z=z,rho=rho,gamma=gamma,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau,normalize=normalize)
+fit.rg<-cox.rhogamma(time=time,delta=delta,z=z,rho=rho,gamma=gamma,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau,est.method=est.method)
 bhat<-fit.rg$bhat
-temp<-cox.rhogamma.resample(bhat=bhat,time=time,delta=delta,z=z,draws=draws,details=details,
-                            rho=rho,gamma=gamma,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau,normalize=normalize,seed.value=seed.value,
+fit.resample<-cox.rhogamma.resample(bhat=bhat,time=time,delta=delta,z=z,draws=draws,details=details,
+                            rho=rho,gamma=gamma,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau,seed.value=seed.value,
                             G1.draws=G1.draws,G0.draws=G0.draws)
 bhat<-c(bhat)
-se.asy<-temp$se.beta
-if(draws>0) se.resample<-sqrt(var(temp$bhat.star))
+se.asy<-fit.resample$se.beta
+if(draws>0) se.resample<-sqrt(var(fit.resample$bhat.star))
 
 # Use asymptotic se as default
 # For resampling, the bias-corrected is used
@@ -350,7 +408,7 @@ R.wald<-ifelse(bhatU<0,1,0)
 # Bias-correction: BC intervals
 # (bhat-b0) distribution
 if(draws>0){
-b.star<-c(temp$bhat.star+bhat)
+b.star<-c(fit.resample$bhat.star+bhat)
 j.beta<-mean(b.star<bhat)
 z.0<-qnorm(j.beta)
 aa<-pnorm(2*z.0+qnorm(alphaL/2))
@@ -359,21 +417,19 @@ bhatL.bc<-c(quantile(b.star,c(aa)))
 bhatU.bc<-c(quantile(b.star,c(bb)))
 R.wald.bc<-ifelse(bhatU.bc<0,1,0)
 }
-
 # Score test
 u.zero<-fit.rg$u.zero
-temp2<-cox.rhogamma.resample(bhat=0,time=time,delta=delta,z=z,draws=0,details=FALSE,
-                             rho=rho,gamma=gamma,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau,normalize=normalize)
+temp<-cox.rhogamma.resample(bhat=0,time=time,delta=delta,z=z,draws=0,details=FALSE,
+                             rho=rho,gamma=gamma,t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
 
-# For weighted log-rank --- use standard
-#if(draws==0) sig2.U0<-temp2$sig2.Ub0
-#if(draws>0) sig2.U0<-var(temp$u.bstar)
+sig2.U0<-temp$sig2.Ub0
 
-sig2.U0<-temp2$sig2.Ub0
+rm("temp")
 
 z.score<-u.zero/sqrt(sig2.U0)
 pvalz<-1-pnorm(z.score)
 R.score<-ifelse(pvalz<=alphaU.adj,1,0)
+
 
 if(rho==0 & gamma==0 & checking){
     # check hr, and ci calculations
@@ -383,11 +439,6 @@ if(rho==0 & gamma==0 & checking){
   hr.check<-exp(checkit$coefficients)
   chisq.check<-checkit$score
   lr0<-survdiff(Surv(time,delta)~z)
- # cat("HR: coxhph vs Mine",c(hr.check,exp(bhat)),"\n")
- # cat("Lower bound: coxph vs Mine",c(ci.check[1],exp(bhatL)),"\n")
- # cat("Upper Bound: coxph vs Mine",c(ci.check[2],exp(bhatU)),"\n")
- # cat("Z^2: coxph vs Mine",c(chisq.check,z.score^2),"\n")
- # print(lr0)
 if(round(hr.check-exp(bhat),3)!=0){ 
   cat("HR: coxhph vs Mine",c(hr.check,exp(bhat)),"\n")
 }
@@ -422,7 +473,7 @@ bhatL.bc=bhatL.bc,bhatU.bc=bhatU.bc,R.wald.bc=R.wald.bc,
 R.score=R.score,z.score=z.score,pval=pvalz,score=u.zero,sig2=sig2.U0,
 hr.hat=exp(bhat),hrL=exp(bhatL),hrU=exp(bhatU),
 hrL.bc=exp(bhatL.bc),hrU.bc=exp(bhatU.bc),
-fit.resample=temp))
+fit.resample=fit.resample))
 }
 if(draws==0){
   return(list(rho=rho,gamma=gamma,bhat=bhat,sehat=sehat,
@@ -437,10 +488,13 @@ if(draws==0){
 
 
 
-fit.combo.wlr<-function(rgs,time,delta,z,draws,plot.rg=TRUE,print.results=FALSE,outfile=NULL,checking=TRUE,
+fit.combo.wlr<-function(rgs,time,delta,z,draws,plot.rg=TRUE,print.results=TRUE,outfile=NULL,checking=FALSE,est.method="score",
                         rgsplot=list(c(0,0),c(0,1),c(0,2),c(0,3),c(1,0),c(2,0),c(2,2))){
   if(draws==0) cat("Note that only KM and (rho,gamma)-profile plotting executed: draws>0 necessary for analysis methods")
-  t.start<-proc.time()[1]
+
+  if(est.method!="score" & est.method!="plik") stop("Estimation method must be score (solving score for zero root) or plik (max partial-likelihood directly)")
+  
+    t.start<-proc.time()[1]
   # (rho,gamma) family
   rgs.mat<-matrix(unlist(rgs),ncol=2,byrow=TRUE) # each row one pair (rho,gamma)
   m<-nrow(rgs.mat) # Number of (rho,gamma) combinations
@@ -494,7 +548,7 @@ legend(7,0.9,c("Treatment","Control"),lwd=4,col=c("black","grey"),lty=2,bty="n")
                             include.gehan=FALSE,details=TRUE,
                             checking=checking,draws.status=TRUE)
   
-  fit.rgmax<-fit.cox.rhogamma(time=time,delta=delta,z=z,
+  fit.rgmax<-fit.cox.rhogamma(time=time,delta=delta,z=z,est.method=est.method,
                               rho=fit.combo$rg.max[1],gamma=fit.combo$rg.max[2],                                                                    
                               G1.draws=fit.combo$G1.draws,G0.draws=fit.combo$G0.draws)
   
@@ -536,7 +590,7 @@ legend(7,0.9,c("Treatment","Control"),lwd=4,col=c("black","grey"),lty=2,bty="n")
   maxZ.beta<-rep(-999,ncol(fit.combo$G1.draws))
   
   for(rg in 1:m){
-    fit.rg<-fit.cox.rhogamma(time=time,delta=delta,z=z,rho=rgs.mat[rg,1],gamma=rgs.mat[rg,2],alphaU=0.025,
+    fit.rg<-fit.cox.rhogamma(time=time,delta=delta,z=z,rho=rgs.mat[rg,1],gamma=rgs.mat[rg,2],alphaU=0.025,est.method=est.method,
                              G1.draws=fit.combo$G1.draws,G0.draws=fit.combo$G0.draws,checking=checking)
     fit.cox<-fit.rg
     maxzb<-pmax(maxZ.beta,abs(fit.rg$fit.resample$Z.bstar))

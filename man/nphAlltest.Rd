@@ -4,7 +4,7 @@
 \alias{nphAlltest}
 \title{Title (for R Documentation)}
 \usage{
-nphAlltest(tte, eventflag, arm)
+nphAlltest(survival, cnsr, trt)
 }
 \arguments{
 \item{tte}{time-to-event duration}
@@ -30,8 +30,9 @@ Details text are provided here
 \examples{
 library(survival)
 library(survMisc)
-indf <- data.frame(trt=rep(0:1,100),aval=rexp(200,c(0.002,0.0018)),event=rbinom(200,1,0.9))
-out <- nphAlltest(tte=indf$aval,eventflag=indf$event,arm=indf$trt)
+set.seed(1)
+indf <- data.frame(trt=rep(c('control','expermental'),100),aval=rexp(200,c(0.002,0.0018)),event=rbinom(200,1,0.9))
+out <- nphAlltest(survival=indf$aval,cnsr=1-indf$event,trt=indf$trt=='expermental')
 out
 
 }

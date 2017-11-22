@@ -1,9 +1,12 @@
+
+
 rm.combo.WLRmax <- function(time        = NULL,
                             status      = NULL,
                             arm         = NULL,
                             strata      = NULL, #Not working for p-value at this moment due to SurMisc package does not support StrataTen
                             wt          = NULL,
                             ties.method = c("exact", "breslow", "efron")[2],
+                            adjust.methods = c("holm", "hochberg", "hommel", "bonferroni")[3],
                             max         = TRUE,
                             alpha       = 0.05
 )
@@ -41,7 +44,8 @@ rm.combo.WLRmax <- function(time        = NULL,
     max.tst.rslt1 <- max(tst.rslt1$Z)
     pval.unadjusted <- pnorm(q=tst.rslt1$Z)
     #print(pval.unadjusted)
-    pval.adjusted <- p.adjust(pval.unadjusted, method = "holm")
+    #pval.adjusted <- p.adjust(pval.unadjusted, method = "holm")
+    pval.adjusted <- p.adjust(pval.unadjusted, method = adjust.methods)
     pval <- min(pval.adjusted)
     #max.index <- which(pval == min(pval.adjusted), arr.ind = TRUE)
     max.index <- which(pval.unadjusted == min(pval.unadjusted), arr.ind = TRUE)
@@ -106,6 +110,8 @@ rm.combo.WLRmax <- function(time        = NULL,
     
   data.anal.w <- rbind(data.anal.event, data.anal.cens)
   data.anal.w$wt[data.anal.w$wt==0] <- 0.000001
+  data.anal.w$wt2 <- -log(data.anal.w$wt)
+  
  
   if(!is.null(strata)){
   
@@ -115,13 +121,13 @@ rm.combo.WLRmax <- function(time        = NULL,
   data.anal.w <<- data.anal.w
   ncol.data.anal.w <<- ncol.data.anal.w
 
-  FH.est <- coxph(Surv(time, status) ~ arm + strata(data.anal.w[5:ncol.data.anal.w]), weight=wt, method= ties.method, data = data.anal.w)
+  FH.est <- coxph(Surv(time, status) ~ arm + strata(data.anal.w[5:ncol.data.anal.w])+ offset(wt2), weight=wt, method= ties.method, data = data.anal.w)
   
   }
   
   if(is.null(strata)){
     
-    FH.est <- coxph(Surv(time, status) ~ arm, weight=wt, method= ties.method, data = data.anal.w)
+    FH.est <- coxph(Surv(time, status) ~ arm + offset(wt2), weight=wt,  method= ties.method, data = data.anal.w)
     
                      }
   
