@@ -2,36 +2,41 @@
 % Please edit documentation in R/nphAlltest.R
 \name{nphAlltest}
 \alias{nphAlltest}
-\title{Title (for R Documentation)}
+\title{nphAlltest A Wrapper Function}
 \usage{
 nphAlltest(survival, cnsr, trt)
 }
 \arguments{
-\item{tte}{time-to-event duration}
+\item{survival}{time-to-event variable}
 
-\item{eventflag}{status variable: 1=event, 0=censoring}
+\item{cnsr}{censoring variable: 1=censoring, 0=event}
 
-\item{arm}{treatment varaible. 1 = experimental arm, 0 = control arm}
+\item{trt}{treatment variable}
 }
 \value{
-The function return a table with the follow components
+The function returns a list with the following components
 \describe{
- \item{column 1 (replace with actual column name)}{If you want to provide more details for each column in the return table, you can do it here.} 
- \item{column 2}{etc...}
- \item{column 3}{etc...}
+ \item{lr}{raw output from log-Rank test} 
+ \item{cox}{raw output from cox PH model}
+ \item{comboLR}{raw output from max-combo test by Larry}
+ \item{maxWLR}{raw output from max-WLR test by Satrajit}
+ \item{rmst}{raw output from restricted mean test}
+ \item{summary.stat}{concatenated summary statistics including 1-sided p-value, point estimate (mean difference/ratio for RMST tests and hazard ratios for the rest tests), lower and upper bound of 95 percent confidence interval}
  }
 }
 \description{
-Description Text is put here.
+A wrapper function to run all candidate tests on given data
 }
 \details{
-Details text are provided here
+The function runs the following tests then consolidates key statistics into a summary table. \cr
+Log-Rank test/cox proportional hazard model, max-combo test by Larry, Max-WLR Test by Satrajit and restricted mean test.
 }
 \examples{
 library(survival)
 library(survMisc)
 set.seed(1)
-indf <- data.frame(trt=rep(c('control','expermental'),100),aval=rexp(200,c(0.002,0.0018)),event=rbinom(200,1,0.9))
+indf <- data.frame(trt=rep(c('control','expermental'),100),aval=rexp(200,c(0.002,0.0018)),
+                   event=rbinom(200,1,0.9))
 out <- nphAlltest(survival=indf$aval,cnsr=1-indf$event,trt=indf$trt=='expermental')
 out
 
