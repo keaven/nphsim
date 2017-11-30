@@ -18,8 +18,8 @@ The function returns a list with the following components
 \describe{
  \item{lr}{raw output from log-Rank test} 
  \item{cox}{raw output from cox PH model}
- \item{comboLR}{raw output from max-combo test by Larry}
- \item{maxWLR}{raw output from max-WLR test by Satrajit}
+ \item{maxWLR}{raw output from max-combo test by Larry}
+ \item{comboLR}{raw output from max-WLR test by Satrajit}
  \item{rmst}{raw output from restricted mean test}
  \item{summary.stat}{concatenated summary statistics including 1-sided p-value, point estimate (mean difference/ratio for RMST tests and hazard ratios for the rest tests), lower and upper bound of 95 percent confidence interval}
  }
