@@ -4,7 +4,8 @@
 \alias{nphAlltest}
 \title{nphAlltest A Wrapper Function}
 \usage{
-nphAlltest(survival, cnsr, trt)
+nphAlltest(survival, cnsr, trt, rgs = list(c(0, 0), c(0, 1), c(0, 2), c(0, 3),
+  c(1, 0), c(2, 0), c(2, 2)))
 }
 \arguments{
 \item{survival}{time-to-event variable}
@@ -34,10 +35,14 @@ Log-Rank test/cox proportional hazard model, max-combo test by Larry, Max-WLR Te
 \examples{
 library(survival)
 library(survMisc)
+library(Matrix)
+library(dplyr)
 set.seed(1)
-indf <- data.frame(trt=rep(c('control','expermental'),100),aval=rexp(200,c(0.002,0.0018)),
+indf <- data.frame(trt=rep(c('control','experimental'),100),aval=rexp(200,c(0.002,0.0018)),
                    event=rbinom(200,1,0.9))
-out <- nphAlltest(survival=indf$aval,cnsr=1-indf$event,trt=indf$trt=='expermental')
+out <- nphAlltest(survival=indf$aval,cnsr=1-indf$event,trt=indf$trt)
+out$summary.stat
+out <- nphAlltest(survival=indf$aval,cnsr=1-indf$event,trt=indf$trt,rgs=list(c(0,0),c(0,1)))
 out
 
 }
