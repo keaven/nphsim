@@ -2,8 +2,9 @@ Package: nphsim
 Type: Package
 Title: Non proportional hazards sample size and simulation
 Version: 0.1.0
-Author: Yang Wang, Haiyan Wu, Keaven Anderson
+Author: Yang Wang, Haiyan Wu, Keaven Anderson, Satrajit Roychoudhury, Tianle Hu, Hongliu Liu
 Maintainer: Keaven Anderson <keavena@gmail.com>
+Date: 2017-12-20
 Description: Routines to compute sample size and do simulations for non-proportional hazards time-to-event clinical trials
 License: GPL (>= 2)
 Encoding: UTF-8
@@ -16,14 +17,16 @@ Imports:
   data.table,
   grid,
   ggplot2,
-  survminer
+  survminer,
+  dplyr,
+  Matrix,
+  mvtnorm,
+  survRM2
 Suggests:
   knitr,
   rmarkdown,
   testthat
 Depends:
-  survMisc,
-  survRM2
 VignetteBuilder:
   knitr
 RoxygenNote: 6.0.1

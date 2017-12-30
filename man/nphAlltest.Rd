@@ -22,7 +22,9 @@ The function returns a list with the following components
  \item{maxWLR}{raw output from max-combo test by Larry}
  \item{comboLR}{raw output from max-WLR test by Satrajit}
  \item{rmst}{raw output from restricted mean test}
- \item{summary.stat}{concatenated summary statistics including 1-sided p-value, point estimate (mean difference/ratio for RMST tests and hazard ratios for the rest tests), lower and upper bound of 95 percent confidence interval}
+ \item{summary.stat}{concatenated summary statistics including 1-sided p-value, point estimate 
+ (mean difference/ratio for RMST tests and hazard ratios for the rest tests), lower and upper 
+ bound of 95 percent confidence interval}
  }
 }
 \description{
@@ -30,11 +32,13 @@ A wrapper function to run all candidate tests on given data
 }
 \details{
 The function runs the following tests then consolidates key statistics into a summary table. \cr
-Log-Rank test/cox proportional hazard model, max-combo test by Larry, Max-WLR Test by Satrajit and restricted mean test.
+Log-Rank test/cox proportional hazard model, max-combo test by Larry, Max-WLR Test by 
+Satrajit and restricted mean test.
 }
 \examples{
 library(survival)
 library(survMisc)
+library(mvtnorm)
 library(Matrix)
 library(dplyr)
 set.seed(1)
@@ -44,5 +48,6 @@ out <- nphAlltest(survival=indf$aval,cnsr=1-indf$event,trt=indf$trt)
 out$summary.stat
 out <- nphAlltest(survival=indf$aval,cnsr=1-indf$event,trt=indf$trt,rgs=list(c(0,0),c(0,1)))
 out
+with(Ex1delayedEffect, nphAlltest(month,1-evntd,trt=factor(trt,labels=c("control","experimental"))))
 
 }
