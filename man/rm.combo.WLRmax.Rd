@@ -7,7 +7,7 @@
 rm.combo.WLRmax(time = NULL, status = NULL, arm = NULL, wt = NULL,
   adjust.methods = c("holm", "hochberg", "hommel", "bonferroni", "asymp")[3],
   ties.method = c("exact", "breslow", "efron")[2], one.sided = FALSE,
-  max = TRUE, alpha = 0.025)
+  HT.est = FALSE, max = TRUE, alpha = 0.025)
 }
 \arguments{
 \item{time}{time-to-event variable}
@@ -23,7 +23,10 @@ Fleming-Harrington weighting sheme to be used}
 
 \item{ties.method}{methods for dealing with tied event times}
 
-\item{one.sided}{logical indicating 1-sided (TRUE) vs 2-sided (FALSE) testing; as currently written, the}
+\item{one.sided}{logical indicating 1-sided (TRUE) vs 2-sided (FALSE) testing}
+
+\item{HT.est}{logical used when adjust.methods is "asymp", max is TRUE to create an estimate
+of HR that is averaged across the specified tests}
 
 \item{max}{indicator of extent of output (TRUE for maximum output)}
 
@@ -57,9 +60,9 @@ logrank statistic with the sum of rho values and sum of gamma values as the resp
 
 data(Ex1delayedEffect)
 with(Ex1delayedEffect,rm.combo.WLRmax(time=month,status=evntd,arm=trt,adjust.methods="asymp",
-                                   wt=list(a1=c(0,1),a2=c(1,1)))) 
+                                   HT.est=TRUE,wt=list(a1=c(0,0),a2=c(0,1),a3=c(1,0),a4=c(1,1)))) 
 with(Ex1delayedEffect,rm.combo.WLRmax(time=month,status=evntd,arm=trt,
-                                   wt=list(a1=c(0,1),a2=c(1,1)))) 
+                                   wt=list(a1=c(0,0),a2=c(0,1),a3=c(1,0),a4=c(1,1)))) 
                                    
 }
 \references{
