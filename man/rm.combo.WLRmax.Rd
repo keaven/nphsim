@@ -60,9 +60,9 @@ logrank statistic with the sum of rho values and sum of gamma values as the resp
 
 data(Ex1delayedEffect)
 with(Ex1delayedEffect,rm.combo.WLRmax(time=month,status=evntd,arm=trt,adjust.methods="asymp",
-                                   HT.est=TRUE,wt=list(a1=c(0,0),a2=c(0,1),a3=c(1,0),a4=c(1,1)))) 
+                                   HT.est=TRUE,wt=list(a1=c(0,1),a2=c(1,0),a3=c(1,1)))) 
 with(Ex1delayedEffect,rm.combo.WLRmax(time=month,status=evntd,arm=trt,
-                                   wt=list(a1=c(0,0),a2=c(0,1),a3=c(1,0),a4=c(1,1)))) 
+                                   wt=list(a1=c(0,1),a2=c(1,0),a3=c(1,1)))) 
                                    
 }
 \references{

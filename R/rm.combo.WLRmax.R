@@ -36,9 +36,9 @@
 #'
 #' data(Ex1delayedEffect)
 #' with(Ex1delayedEffect,rm.combo.WLRmax(time=month,status=evntd,arm=trt,adjust.methods="asymp",
-#'                                    HT.est=TRUE,wt=list(a1=c(0,0),a2=c(0,1),a3=c(1,0),a4=c(1,1)))) 
+#'                                    HT.est=TRUE,wt=list(a1=c(0,1),a2=c(1,0),a3=c(1,1)))) 
 #' with(Ex1delayedEffect,rm.combo.WLRmax(time=month,status=evntd,arm=trt,
-#'                                    wt=list(a1=c(0,0),a2=c(0,1),a3=c(1,0),a4=c(1,1)))) 
+#'                                    wt=list(a1=c(0,1),a2=c(1,0),a3=c(1,1)))) 
 #'                                    
 #' @import survival survMisc
 #'
@@ -293,9 +293,21 @@ rm.combo.WLRmax<- function(time        = NULL,
     
   }
   
-  if(max & adjust.methods != "asymp"){out <- list(pval=pval, pval.adjusted = pval.adjusted, p.unadjusted = p.unadjusted, hr.est=hr.est, hr.low=hr.low, hr.up=hr.up, max.index=max.index, hr.low.adjusted= hr.low.adjusted, hr.up.adjusted=hr.up.adjusted,  Z.tst.rslt1= Z.tst.rslt1)}
-  if(HT.est & max & adjust.methods == "asymp"){out <- list(cor=cor.tst,pval=pval, p.unadjusted= p.unadjusted, hr.est=hr.est, hr.low=hr.low, hr.up=hr.up, max.index=max.index, hr.low.adjusted= hr.low.adjusted, hr.up.adjusted=hr.up.adjusted,  Z.tst.rslt1= Z.tst.rslt1, q.tst.rslt1=q.tst.rslt1, max.abs.z=z.max, hr.est.HT=hr.est.HT, hr.low.HT= hr.low.HT, hr.up.HT=hr.up.HT, prob.selection=prob.selection, data.anal.w=data.anal.w)}
-  if(!HT.est & max & adjust.methods == "asymp"){out <- list(cor=cor.tst,pval=pval, p.unadjusted= p.unadjusted, hr.est=hr.est, hr.low=hr.low, hr.up=hr.up, max.index=max.index, hr.low.adjusted= hr.low.adjusted, hr.up.adjusted=hr.up.adjusted,  Z.tst.rslt1= Z.tst.rslt1, q.tst.rslt1=q.tst.rslt1, max.abs.z=z.max, data.anal.w=data.anal.w)}
+  if(max & adjust.methods != "asymp"){out <- list(pval=pval, pval.adjusted = pval.adjusted, p.unadjusted = p.unadjusted, 
+                                                  hr.est=hr.est, hr.low=hr.low, hr.up=hr.up, max.index=max.index, 
+                                                  hr.low.adjusted= hr.low.adjusted, hr.up.adjusted=hr.up.adjusted,  
+                                                  Z.tst.rslt1= Z.tst.rslt1)}
+  if(HT.est & max & adjust.methods == "asymp"){out <- list(cor=cor.tst,pval=pval, p.unadjusted= p.unadjusted, 
+                                                           hr.est=hr.est, hr.low=hr.low, hr.up=hr.up, max.index=max.index,
+                                                           hr.low.adjusted= hr.low.adjusted, hr.up.adjusted=hr.up.adjusted,  
+                                                           Z.tst.rslt1= Z.tst.rslt1, q.tst.rslt1=q.tst.rslt1, max.abs.z=z.max, 
+                                                           hr.est.HT=hr.est.HT, hr.low.HT= hr.low.HT, hr.up.HT=hr.up.HT, 
+                                                           prob.selection=prob.selection, data.anal.w=data.anal.w)}
+  if(!HT.est & max & adjust.methods == "asymp"){out <- list(cor=cor.tst,pval=pval, p.unadjusted= p.unadjusted, 
+                                                            hr.est=hr.est, hr.low=hr.low, hr.up=hr.up, 
+                                                            max.index=max.index, hr.low.adjusted= hr.low.adjusted, 
+                                                            hr.up.adjusted=hr.up.adjusted,  Z.tst.rslt1= Z.tst.rslt1, 
+                                                            q.tst.rslt1=q.tst.rslt1, max.abs.z=z.max, data.anal.w=data.anal.w)}
   if(!max){out <- list(pval=pval, hr.est=hr.est, hr.low=hr.low, hr.up=hr.up)}
   
   return(out)
