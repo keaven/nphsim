@@ -58,7 +58,10 @@ logrank statistic with the sum of rho values and sum of gamma values as the resp
 }
 \examples{
 
-data(Ex1delayedEffect)
+library(survival)
+library(Matrix)
+library(mvtnorm)
+library(dplyr)
 with(Ex1delayedEffect,rm.combo.WLRmax(time=month,status=evntd,arm=trt,adjust.methods="asymp",
                                    HT.est=TRUE,wt=list(a1=c(0,1),a2=c(1,0),a3=c(1,1)))) 
 with(Ex1delayedEffect,rm.combo.WLRmax(time=month,status=evntd,arm=trt,
