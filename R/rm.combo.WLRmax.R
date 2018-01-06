@@ -67,9 +67,9 @@ rm.combo.WLRmax<- function(time        = NULL,
   fit<- ten(survfit(Surv(time, status) ~ arm, data = data.anal))  
   
   
-  #Testing
+  #Testing (capture.output suppresses output not wanted)
   
-  comp(fit, p= sapply(wt, function(x){x[1]}), q= sapply(wt, function(x){x[2]}))
+  xx <- capture.output(comp(fit, p= sapply(wt, function(x){x[1]}), q= sapply(wt, function(x){x[2]})))
   
   tst.rslt <- attr(fit, 'lrt')
   
@@ -120,7 +120,7 @@ rm.combo.WLRmax<- function(time        = NULL,
     
     #Testing (for calculating the covariances)
     
-    comp(fit2, p= sapply(wt3, function(x){x[1]}), q= sapply(wt3, function(x){x[2]}))
+    xx<-capture.output(comp(fit2, p= sapply(wt3, function(x){x[1]}), q= sapply(wt3, function(x){x[2]})))
     
     tst.rsltt <- attr(fit2, 'lrt')
     tst.rslt2 <- subset(tst.rsltt, grepl("FH", tst.rsltt$W))
