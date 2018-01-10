@@ -4,8 +4,8 @@
 \alias{nphAlltest}
 \title{nphAlltest A Wrapper Function}
 \usage{
-nphAlltest(survival, cnsr, trt, rgs = list(c(0, 0), c(0, 1), c(0, 2), c(0, 3),
-  c(1, 0), c(2, 0), c(2, 2)))
+nphAlltest(survival, cnsr, trt, cutpt = median(survival),
+  KMtitle = "Kaplan-Meier Plot", cumhaztitle = "Cumulative Hazard Plot")
 }
 \arguments{
 \item{survival}{time-to-event variable}
@@ -13,27 +13,33 @@ nphAlltest(survival, cnsr, trt, rgs = list(c(0, 0), c(0, 1), c(0, 2), c(0, 3),
 \item{cnsr}{censoring variable: 1=censoring, 0=event}
 
 \item{trt}{treatment variable}
+
+\item{cutpt}{a cutpoint or cutpoints to use in defining time intervals for piecewise hazard ratio estimation}
+
+\item{KMtitle}{title for Kaplan-Meier plot}
+
+\item{cumhaztitle}{title for cumulative hazard plot}
 }
 \value{
 The function returns a list with the following components
 \describe{
- \item{lr}{raw output from log-Rank test} 
- \item{cox}{raw output from cox PH model}
- \item{maxWLR}{raw output from max-combo test by Larry}
- \item{comboLR}{raw output from max-WLR test by Satrajit}
- \item{rmst}{raw output from restricted mean test}
  \item{summary.stat}{concatenated summary statistics including 1-sided p-value, point estimate 
  (mean difference/ratio for RMST tests and hazard ratios for the rest tests), lower and upper 
  bound of 95 percent confidence interval}
+ \item{hr.pe}{Piecewise Cox model estimate, SE and 95 percent confidence limits for
+ hazard ratio by intervals specified in cutpt}
+ \item{km.plot}{Kaplan-Meier plot}
+ \item{cumhaz.plot}{Cumulative hazard plot}
  }
 }
 \description{
-A wrapper function to run all candidate tests on given data
+A wrapper function to run all candidate tests for a treatment difference on given data
 }
 \details{
 The function runs the following tests then consolidates key statistics into a summary table. \cr
-Log-Rank test/cox proportional hazard model, max-combo test by Larry, Max-WLR Test by 
-Satrajit and restricted mean test.
+Log-Rank test/cox proportional hazard model, maximum weighted logrank (asymptotic p-value computation), 
+restricted mean survival difference and ratio as well as restricted mean time lost ratio; note that the rmst2 
+default cutoff time of the minimum of the maximum observed time in each group.
 }
 \examples{
 library(survival)
@@ -41,13 +47,15 @@ library(survMisc)
 library(mvtnorm)
 library(Matrix)
 library(dplyr)
+library(survminer)
+library(survRM2)
 set.seed(1)
 indf <- data.frame(trt=rep(c('control','experimental'),100),aval=rexp(200,c(0.002,0.0018)),
                    event=rbinom(200,1,0.9))
 out <- nphAlltest(survival=indf$aval,cnsr=1-indf$event,trt=indf$trt)
 out$summary.stat
-out <- nphAlltest(survival=indf$aval,cnsr=1-indf$event,trt=indf$trt,rgs=list(c(0,0),c(0,1)))
-out
-with(Ex1delayedEffect, nphAlltest(month,1-evntd,trt=factor(trt,labels=c("control","experimental"))))
-
+out$km.plot
+out$cumhaz.plot
+x1out <- with(Ex1delayedEffect, nphAlltest(month,1-evntd,trt=factor(trt,labels=c("control","experimental"))))
+x1out$summary.stat
 }
