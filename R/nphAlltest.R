@@ -40,6 +40,7 @@
 #' out$cumhaz.plot
 #' x1out <- with(Ex1delayedEffect, nphAlltest(month,1-evntd,trt=factor(trt,labels=c("control","experimental"))))
 #' x1out$summary.stat
+#' summary(x1out$fit,times=c(3,6,9))
 #' @export
 #' @import data.table survival 
 #' 
@@ -105,5 +106,5 @@ nphAlltest <- function(survival,cnsr,trt,cutpt=median(survival),
                       censSize=2)
   
   return (list(summary.stat=out.stat,hr.pe=hr.pe,cumhaz.plot=cumhaz.plot,
-               km.plot=km.plot))
+               km.plot=km.plot,fit=fit))
 }

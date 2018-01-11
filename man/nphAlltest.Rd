@@ -58,4 +58,5 @@ out$km.plot
 out$cumhaz.plot
 x1out <- with(Ex1delayedEffect, nphAlltest(month,1-evntd,trt=factor(trt,labels=c("control","experimental"))))
 x1out$summary.stat
+summary(x1out$fit,times=c(3,6,9))
 }
