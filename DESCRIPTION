@@ -11,22 +11,22 @@ Encoding: UTF-8
 LazyData: true
 Imports:
   gsDesign,
-  survMisc,
-  survival,
   doParallel,
   data.table,
   grid,
-  ggplot2,
-  survminer,
-  dplyr,
-  Matrix,
-  mvtnorm,
-  survRM2
+  ggplot2
 Suggests:
   knitr,
   rmarkdown,
   testthat
 Depends:
+  survival,
+  survMisc,
+  mvtnorm,
+  Matrix,
+  dplyr,
+  survminer,
+  survRM2
 VignetteBuilder:
   knitr
 RoxygenNote: 6.0.1
