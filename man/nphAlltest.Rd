@@ -42,13 +42,6 @@ restricted mean survival difference and ratio as well as restricted mean time lo
 default cutoff time of the minimum of the maximum observed time in each group.
 }
 \examples{
-library(survival)
-library(survMisc)
-library(mvtnorm)
-library(Matrix)
-library(dplyr)
-library(survminer)
-library(survRM2)
 set.seed(1)
 indf <- data.frame(trt=rep(c('control','experimental'),100),aval=rexp(200,c(0.002,0.0018)),
                    event=rbinom(200,1,0.9))

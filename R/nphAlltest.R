@@ -24,13 +24,6 @@
 #'  \item{cumhaz.plot}{Cumulative hazard plot}
 #'  } 
 #' @examples
-#' library(survival)
-#' library(survMisc)
-#' library(mvtnorm)
-#' library(Matrix)
-#' library(dplyr)
-#' library(survminer)
-#' library(survRM2)
 #' set.seed(1)
 #' indf <- data.frame(trt=rep(c('control','experimental'),100),aval=rexp(200,c(0.002,0.0018)),
 #'                    event=rbinom(200,1,0.9))
@@ -64,7 +57,7 @@ nphAlltest <- function(survival,cnsr,trt,cutpt=median(survival),
   rgs1 <- list(c(0,0),c(0,1))
   AsympCombo1 <- rm.combo.WLRmax(time=survival,status=1-cnsr,arm=(trt=='experimental'), wt=rgs1[-1], 
                                  adjust.methods="asymp",one.sided=T)
-  combstat1 <- unlist(AsympCombo1[c('pval','hr.est','hr.low.adjusted','hr.up.adjusted','max.index')])
+  combstat1 <- unlist(AsympCombo1[c('pval','hr.est','hr.low.adjusted.E','hr.up.adjusted.E','max.index')])
   stat3 <- data.frame(Test=paste0('FH Combination ((0,0),(0,1)) wt=(',rgs1[[combstat1[5]]][1],',',
                                   rgs1[[combstat1[5]]][2],')'),t(combstat1[1:4]))
   
@@ -72,7 +65,7 @@ nphAlltest <- function(survival,cnsr,trt,cutpt=median(survival),
   rgs2 <- list(c(0,0),c(0,1),c(1,0),c(1,1))
   AsympCombo2 <- rm.combo.WLRmax(time=survival,status=1-cnsr,arm=(trt=='experimental'), wt=rgs2[-1], 
                                  adjust.methods="asymp",one.sided=T)
-  combstat2 <- unlist(AsympCombo2[c('pval','hr.est','hr.low.adjusted','hr.up.adjusted','max.index')])
+  combstat2 <- unlist(AsympCombo2[c('pval','hr.est','hr.low.adjusted.E','hr.up.adjusted.E','max.index')])
   stat4 <- data.frame(Test=paste0('FH Combination ((0,0),(0,1),(1,0),(1,1)) wt=(',rgs2[[combstat2[5]]][1],
                                   ',',rgs2[[combstat2[5]]][2],')'),t(combstat2[1:4])) 
   
@@ -88,7 +81,11 @@ nphAlltest <- function(survival,cnsr,trt,cutpt=median(survival),
   # piecewise HR
   hr.pe <- cox_pw(time=survival,status=1-cnsr,arm=ifelse(trt=='experimental',1,0), cutpt)$est
   
-#   plot cumulative hazard and survival curves
+  # HR over time using Schoenfeld residual plot.
+  zph.fit <- cox.zph(coxph(Surv(survival,1-cnsr)~trt))
+  zph.plot <- ggcoxzph(zph.fit)
+  
+  #   plot cumulative hazard and survival curves
   d <- data.frame(survival=survival,status=1-cnsr,trt=trt)
   fit <- survfit(Surv(survival, status)~trt,data=d)
   cumhaz.plot <- ggsurvplot(fit,data=d,
@@ -106,5 +103,5 @@ nphAlltest <- function(survival,cnsr,trt,cutpt=median(survival),
                       censSize=2)
   
   return (list(summary.stat=out.stat,hr.pe=hr.pe,cumhaz.plot=cumhaz.plot,
-               km.plot=km.plot,fit=fit))
+               km.plot=km.plot,zph.plot=zph.plot,fit=fit))
 }

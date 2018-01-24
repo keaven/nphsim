@@ -5,7 +5,7 @@
 \title{Weighted Logrank combination with asymptotic p-value adjustment}
 \usage{
 rm.combo.WLRmax(time = NULL, status = NULL, arm = NULL, wt = NULL,
-  adjust.methods = c("holm", "hochberg", "hommel", "bonferroni", "asymp")[3],
+  adjust.methods = c("holm", "hochberg", "hommel", "bonferroni", "asymp")[5],
   ties.method = c("exact", "breslow", "efron")[2], one.sided = FALSE,
   HT.est = FALSE, max = TRUE, alpha = 0.025)
 }
@@ -58,10 +58,6 @@ logrank statistic with the sum of rho values and sum of gamma values as the resp
 }
 \examples{
 
-library(survival)
-library(Matrix)
-library(mvtnorm)
-library(dplyr)
 with(Ex1delayedEffect,rm.combo.WLRmax(time=month,status=evntd,arm=trt,adjust.methods="asymp",
                                    HT.est=TRUE,wt=list(a1=c(0,1),a2=c(1,0),a3=c(1,1)))) 
 with(Ex1delayedEffect,rm.combo.WLRmax(time=month,status=evntd,arm=trt,
