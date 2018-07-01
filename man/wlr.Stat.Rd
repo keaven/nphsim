@@ -11,7 +11,7 @@ wlr.Stat(survival, cnsr, trt, stra = NULL, fparam)
 
 \item{cnsr}{censoring variable: 1=censoring, 0=event}
 
-\item{trt}{treatment varaible. Accepted values are either "experiment" or "control"}
+\item{trt}{treatment varaible. Accepted values are either "experimental" or "control"}
 
 \item{stra}{stratification variable for stratified weighted logrank test. Default is \code{NULL}.}
 

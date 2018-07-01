@@ -1,0 +1,167 @@
+---
+title: "Piecewise Exponential Fits to Test Cases"
+author: "Keaven Anderson"
+date: "August 9, 2017"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Piecewise Exponential Fits to Test Cases}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+options(scipen=999)
+knitr::opts_chunk$set(echo = TRUE)
+library(nphsim)
+library(survminer)
+library(survival)
+library(knitr)
+```
+
+We fit initial piecewise exponential distributions to fit case studies for non-proportional hazards.
+There are 6 test cases that are divided into 5 sections below: 2 cases with delayed benefit, one cure model with proportional hazards, one belly shaped difference (expanding and then coming together), one with increasing treatment effect over time (widening), and one with crossing survival function. Each dataset is in an R dataset in the data directory of the package (Ex1delayedEffect, Ex2delayedEffect, Ex3curewithph, Ex4belly, Ex5widening, Ex6crossing), each with a corresponding help file. In each file, there is a suggested fit using the piecewise exponential distribution. Below, we re-derive these fits and compare the results to the Kaplan-Meier curves for each dataset. We also do a likelihood ratio test for any treatment effect and compare to the logrank test.
+
+## Delayed benefit: cases 1 and 2
+
+We begin with Kaplan-Meier curves for test cases 1 and 2 using the survminer package function ggsurvplot.
+Note that the data structure for each test case is exactly the same as seen below.
+The function `ggsurvplot` is from the `survminer` package available at CRAN.
+
+
+```{r,fig.height=5,fig.width=6}
+fit1 <- survfit(Surv(month, evntd) ~ trt,
+               data = Ex1delayedEffect)
+fit2 <- survfit(Surv(month, evntd) ~ trt,
+               data = Ex2delayedEffect)
+Ex1KMPlot<-ggsurvplot(fit1, data = Ex1delayedEffect, risk.table = TRUE, break.time.by=3)
+Ex2KMPlot<-ggsurvplot(fit2, data = Ex2delayedEffect, risk.table = TRUE, break.time.by=3)
+Ex1KMPlot
+Ex2KMPlot
+```
+
+### Piecewise exponential fitting
+
+For each test case, we use `pwexpfit`  to fit piecewise exponential survival distributions by treatment group.
+The defaults of 3 intervals of length 3 is used and the routine automatically adds on another interval of indefinite length when there are patients followed for more than 9 months in each case. (PRESUMABLY THESE APPROXIMATE TIMING OF SCANS FOR THESE STUDIES).
+The variables shown in the table for each interval are as follows:
+
+* `intervals` - interval length,
+* `TTOT` - total time on test for all observations in interval,
+* `events` - events occuring in interval,
+* `rate` - event rate (`events / TTOT`) in interval,
+* `m2ll` - minus 2 times the log-likelihood for given rate, events and time on test (` 2 *(rate*TTOT-events*log(rate))`).
+
+In test case 1 we can see that event rates are similar in the first 3 months for each treatment group and afterwards are substantially reduced in the experimental group. 
+Within each treatment group, failure rates are reasonably constant after month 3.
+We show code for the first table printing, but suppress showing code for later analogous table generation statements.
+
+```{r}
+kable(Ex1Rate1 <- with(subset(Ex1delayedEffect,trt==1), pwexpfit(Surv(month,evntd))),
+      caption="Test case 1 piecewise exponential fit, experimental group")
+```
+
+```{r,echo=FALSE}
+kable(Ex1Rate0 <- with(subset(Ex1delayedEffect,trt==0), pwexpfit(Surv(month,evntd))),
+      caption="Test case 1 piecewise exponential fit, control group")
+```
+
+### Testing for treatment effect
+
+If we fit the same piecewise exponential model with no difference between treatment groups and sum `m2ll` for that model compared to `m2ll` for the combined fits by treatment group, we can perform a 4 df Chi-square test for treatment effect. We compare this p-value with a logrank and find they are nearly identical.
+
+```{r}
+Ex1RateAll <-  with(Ex1delayedEffect, pwexpfit(Surv(month,evntd)))
+pchisq(sum(Ex1RateAll$m2ll)-sum(Ex1Rate0$m2ll+Ex1Rate1$m2ll),df=4,lower.tail=FALSE)
+lr1 <- with(Ex1delayedEffect, survdiff(formula = Surv(month, evntd) ~ trt))$chisq
+pchisq(lr1,df=1,lower.tail=FALSE)
+```
+
+```{r,echo=FALSE}
+Ex2Rate1 <- with(subset(Ex2delayedEffect,trt==1), pwexpfit(Surv(month,evntd)))
+Ex2Rate0 <- with(subset(Ex2delayedEffect,trt==0), pwexpfit(Surv(month,evntd)))
+rate2all <-  with(Ex2delayedEffect, pwexpfit(Surv(month,evntd)))
+p2df4 <- pchisq(sum(rate2all$m2ll)-sum(Ex2Rate0$m2ll+Ex2Rate1$m2ll),df=4,lower.tail=FALSE)
+lr2 <- with(Ex1delayedEffect, survdiff(formula = Surv(month, evntd) ~ trt))$chisq
+p2lr <- pchisq(lr2, df=1, lower.tail=FALSE)
+```
+
+For test case 2, we see a similar pattern below. 
+However, the early event rate where event rates are similar has a higher rate and the drop in rates for the next 6 months is more substantial. An immediate question comes as to which of test cases 1 and 2 has a more impressive treatment effect; a question that will obviously depend on the metric used. 
+The 4 degree of freedom likelihood ratio test p-value in this case is `r round(p2df4,5)` compared to `r round(p2lr,5)` for the logrank test; thus, in this case the non-proportional hazards has clearly left room for a more sensitive test than logrank.
+In this case, there may be a dropoff in the event rate in both treatment groups late in follow-up, but follow-up there is limited enough that this may be a questionable conclusion.
+
+```{r,echo=FALSE}
+kable(Ex2Rate1, caption="Test case 2 piecewise exponential fit, experimental group")
+kable(Ex2Rate0, caption="Test case 2 piecewise exponential fit, control group")
+```
+
+### Estimating the hazard ratio over time
+
+We can look at the hazard ratio in each interval as follows using the information just created:
+
+```{r}
+# example 1 piecewise hazard ratios
+Ex1Rate1$rate / Ex1Rate0$rate
+# example 2 piecewise hazard ratios
+Ex2Rate1$rate / Ex2Rate0$rate
+
+```
+
+### Model simplification
+
+Now we consider simplifying the piecewise exponential model for test case 1.
+We assume a common failure rate for the first 3 months across treatment groups and a single rate thereafter.
+The code has some level of detail as subsetting and recombining is involved; however, no new concepts are introduced, so we do not show the code.
+
+```{r,echo=FALSE}
+# common rate for first 3 months
+Ex1RateAllMonth3 <- Ex1RateAll[1,]
+Ex1RateAllMonth3$Treatment <- 'Combined'
+Ex1RateAllMonth3$Period <- '< 3 months'
+# Combine time periods after 3 months into 1 for experimental treatment
+Ex1Rate1PostMonth3 <- with(subset(Ex1delayedEffect,trt==1),
+                           pwexpfit(Surv(month,evntd),intervals=c(3,Inf)))[2,]
+Ex1Rate1PostMonth3$Treatment <- 'Experimental'
+Ex1Rate1PostMonth3$Period <- '> month 3'
+# Repeat for control
+Ex1Rate0PostMonth3 <- with(subset(Ex1delayedEffect,trt==0),
+                           pwexpfit(Surv(month,evntd),intervals=c(3,Inf)))[2,]
+Ex1Rate0PostMonth3$Treatment <- 'Control'
+Ex1Rate0PostMonth3$Period <- '> month 3'
+# combine and print table
+Ex1RateSimple <- rbind(Ex1RateAllMonth3,Ex1Rate0PostMonth3,Ex1Rate1PostMonth3)
+kable(Ex1RateSimple[,-1], caption="2-piece exponential fit with HR=1 for first 3 months, test case 1.")
+```
+
+The hazard ratio after the first 3 months is `r with(Ex1RateSimple,round(rate[3]/rate[2],2))`.
+The 5 df Chi-square test for improvement of the full model over this 3 parameter model is ($-2\times \hbox{log-likelihood}=$ `r round(sum(Ex1Rate1$m2ll+Ex1Rate0$m2ll), 2)`) vs. the full model fit above with piecewise exponential in each treatment group ($-2 \times  \hbox{log-likelihood}=$ `r round(sum(Ex1RateSimple$m2ll),2)`) is 
+`r -round(sum(Ex1Rate1$m2ll+Ex1Rate0$m2ll) - sum(Ex1RateSimple$m2ll),2)` ($p=$ `r round(pchisq( sum(Ex1RateSimple$m2ll)-sum(Ex1Rate1$m2ll+Ex1Rate0$m2ll),df=5,lower.tail=FALSE),3)`).
+This suggests the simplified model with a common exponential failure rate for the first 3 months followed by an exponential failure rate in each arm with a hazard ratio of 
+`r with(Ex1RateSimple,round(rate[3]/rate[2],2))` fits case study 1 reasonably well.
+
+### Overlay of Kaplan-Meier and Simplified Exponential Model curves
+
+Now we overlay the Kaplan-Meier curve from test case 1 with the simplified piecewise exponential fit.
+
+```{r,echo=FALSE}
+Ex1PWEMonth3 <- exp(-Ex1RateSimple$rate[1]*(0:30)*.1)
+Ex1PWE1PostMonth3 <- Ex1PWEMonth3[31]*exp(-Ex1RateSimple$rate[3]*(1:120)*.1)
+Ex1PWE0PostMonth3 <- Ex1PWEMonth3[31]*exp(-Ex1RateSimple$rate[2]*(1:120)*.1)
+Ex1PWESurvData <- rbind(data.frame(time=(0:150)*.1,surv=c(Ex1PWEMonth3,Ex1PWE0PostMonth3),strata='trt=0'),
+                        data.frame(time=(0:150)*.1,surv=c(Ex1PWEMonth3,Ex1PWE1PostMonth3),strata='trt=1'))
+Ex1KMPlot$plot+geom_line(data=Ex1PWESurvData,aes(x=time,y=surv,col=strata))
+```
+
+### Possible models for design and simulations based on examples
+
+For test case 1, a reasonable approximation would be a common exponential failure rate of 0.10 per month for the first 3 months followed by an exponential failure rate of 0.16 per month in the control group and 0.08 in the experimental group yielding a hazard ratio of 0.5 after month 3.
+
+
+## Cure with proportional hazards: case 3
+
+## Belly shaped: case 4
+
+## Widening: case 5
+
+## Crossing: case 6
+

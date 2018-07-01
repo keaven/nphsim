@@ -15,7 +15,7 @@
 #'
 #' @param survival time-to-event variable
 #' @param cnsr censoring variable: 1=censoring, 0=event
-#' @param trt  treatment varaible. Accepted values are either "experiment" or "control"
+#' @param trt  treatment varaible. Accepted values are either "experimental" or "control"
 #' @param stra stratification variable for stratified weighted logrank test. Default is \code{NULL}.
 #' @param fparam a list input to request additional FH test and time of delayed separation in the simplified APPLE method
 #' \describe{
