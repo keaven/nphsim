@@ -55,7 +55,9 @@ rm.combo.WLRmax<- function(time        = NULL,
                            one.sided   = FALSE,
                            HT.est      = FALSE,
                            max         = TRUE,
-                           alpha       = 0.025
+                           alpha       = 0.025,
+                           algorithm   = GenzBretz,
+                           ...
 )
 {
   
@@ -90,7 +92,7 @@ rm.combo.WLRmax<- function(time        = NULL,
   
   if(max & adjust.methods == "asymp"){
     
-    #Calculating the covariace matrix
+    #Calculating the covariance matrix
     
     tst.rslt1 <- rbind(tst.rslt[1,],subset(tst.rslt, grepl("FH", tst.rslt$W)))
     
@@ -153,8 +155,11 @@ rm.combo.WLRmax<- function(time        = NULL,
     
     #p.value=P(min(Z) < min(z.val))= 1 - P(Z_i >= min(z.val); for all i)
     
-    if(one.sided){pval2 <- 1 - max(min(pmvnorm(lower = rep(-z.max, length(Z.tst.rslt1)), upper= rep(z.max, length(Z.tst.rslt1)), corr= cor.tst, algorithm= Miwa())[1],0.9999), 0.0001)
-    
+    if(one.sided){pval2 <- 1 - max(min(pmvnorm(lower = rep(-z.max, length(Z.tst.rslt1)), 
+                                               upper= rep(z.max, length(Z.tst.rslt1)), 
+                                               corr= cor.tst, 
+                                               algorithm= algorithm(...))[1],0.9999), 0.0001)
+  
     max.tst <- which(abs(Z.tst.rslt1) == max(abs(Z.tst.rslt1)), arr.ind = TRUE) 
     
     if(Z.tst.rslt1[max.tst] >= 0){pval <- 1 - pval2/2}  
