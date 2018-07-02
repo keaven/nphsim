@@ -155,10 +155,10 @@ rm.combo.WLRmax<- function(time        = NULL,
     
     #p.value=P(min(Z) < min(z.val))= 1 - P(Z_i >= min(z.val); for all i)
     
-    if(one.sided){pval2 <- 1 - max(min(pmvnorm(lower = rep(-z.max, length(Z.tst.rslt1)), 
+    if(one.sided){pval2 <- 1 - min(pmvnorm(lower = rep(-z.max, length(Z.tst.rslt1)), 
                                                upper= rep(z.max, length(Z.tst.rslt1)), 
                                                corr= cor.tst, 
-                                               algorithm= algorithm(...))[1],0.9999), 0.0001)
+                                               algorithm= algorithm(...))[1],0.9999)
   
     max.tst <- which(abs(Z.tst.rslt1) == max(abs(Z.tst.rslt1)), arr.ind = TRUE) 
     
@@ -167,7 +167,10 @@ rm.combo.WLRmax<- function(time        = NULL,
     
     }
     
-    if(!one.sided){pval <- 1 - min(1, pmvnorm(lower = rep(-z.max, length(Z.tst.rslt1)), upper= rep(z.max, length(Z.tst.rslt1)), corr= cor.tst, algorithm= Miwa())[1])}
+    if(!one.sided){pval <- 1 - min(.9999, pmvnorm(lower = rep(-z.max, length(Z.tst.rslt1)), 
+                                              upper= rep(z.max, length(Z.tst.rslt1)), 
+                                              corr= cor.tst, 
+                                              algorithm= algorithm(...))[1])}
     
     p.unadjusted <- pnorm(q=tst.rslt1$Z)
     max.index <- which(p.unadjusted == min(p.unadjusted), arr.ind = TRUE)
