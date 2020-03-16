@@ -167,7 +167,7 @@ rm.combo.WLRmax<- function(time        = NULL,
     if(!one.sided){pval <- 1 - pmvnorm(lower = rep(-z.max, length(Z.tst.rslt1)), 
                                        upper= rep(z.max, length(Z.tst.rslt1)), 
                                        corr= cor.tst, 
-                                       algorithm= GenzBretz(maxpts=50000,abseps=0.00001))[1])}
+                                       algorithm= GenzBretz(maxpts=50000,abseps=0.00001))[1]}
     
     p.unadjusted <- pnorm(q=tst.rslt1$Z)
     max.index <- which(p.unadjusted == min(p.unadjusted), arr.ind = TRUE)
