@@ -5,7 +5,8 @@
 \title{nphAlltest A Wrapper Function}
 \usage{
 nphAlltest(survival, cnsr, trt, cutpt = median(survival),
-  KMtitle = "Kaplan-Meier Plot", cumhaztitle = "Cumulative Hazard Plot")
+  KMtitle = "Kaplan-Meier Plot",
+  cumhaztitle = "Cumulative Hazard Plot")
 }
 \arguments{
 \item{survival}{time-to-event variable}

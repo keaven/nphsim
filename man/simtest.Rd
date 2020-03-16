@@ -4,8 +4,8 @@
 \alias{simtest}
 \title{Testing for a time-to-event study simulation}
 \usage{
-simtest(x, anaT = NULL, anaD = NULL, anatype = "event", method = NULL,
-  stratum = NULL, fparam = NULL, d = NULL)
+simtest(x, anaT = NULL, anaD = NULL, anatype = "event",
+  method = NULL, stratum = NULL, fparam = NULL, d = NULL)
 }
 \arguments{
 \item{x}{list genearted by simulation}
