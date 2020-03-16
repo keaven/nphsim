@@ -1,7 +1,7 @@
 Package: nphsim
 Type: Package
 Title: Non proportional hazards sample size and simulation
-Version: 0.1.1
+Version: 0.1.1.9000
 Author: Yang Wang, Haiyan Wu, Keaven Anderson, Satrajit Roychoudhury, Tianle Hu, Hongliu Liu
 Maintainer: Keaven Anderson <keavena@gmail.com>
 Date: 2017-12-20
