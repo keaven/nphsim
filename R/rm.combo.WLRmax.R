@@ -153,8 +153,10 @@ rm.combo.WLRmax<- function(time        = NULL,
     
     #p.value=P(min(Z) < min(z.val))= 1 - P(Z_i >= min(z.val); for all i)
     
-    if(one.sided){pval2 <- 1 - max(min(pmvnorm(lower = rep(-z.max, length(Z.tst.rslt1)), upper= rep(z.max, length(Z.tst.rslt1)), corr= cor.tst, algorithm= Miwa())[1],0.9999), 0.0001)
-    
+    if(one.sided){pval2 <- 1 - pmvnorm(lower = rep(-z.max, length(Z.tst.rslt1)), 
+                                       upper = rep(z.max, length(Z.tst.rslt1)), 
+                                       corr = cor.tst, 
+                                       algorithm = GenzBretz(maxpts=50000,abseps=0.00001))[1]
     max.tst <- which(abs(Z.tst.rslt1) == max(abs(Z.tst.rslt1)), arr.ind = TRUE) 
     
     if(Z.tst.rslt1[max.tst] >= 0){pval <- 1 - pval2/2}  
@@ -162,7 +164,10 @@ rm.combo.WLRmax<- function(time        = NULL,
     
     }
     
-    if(!one.sided){pval <- 1 - min(1, pmvnorm(lower = rep(-z.max, length(Z.tst.rslt1)), upper= rep(z.max, length(Z.tst.rslt1)), corr= cor.tst, algorithm= Miwa())[1])}
+    if(!one.sided){pval <- 1 - pmvnorm(lower = rep(-z.max, length(Z.tst.rslt1)), 
+                                       upper= rep(z.max, length(Z.tst.rslt1)), 
+                                       corr= cor.tst, 
+                                       algorithm= GenzBretz(maxpts=50000,abseps=0.00001))[1])}
     
     p.unadjusted <- pnorm(q=tst.rslt1$Z)
     max.index <- which(p.unadjusted == min(p.unadjusted), arr.ind = TRUE)
@@ -286,7 +291,10 @@ rm.combo.WLRmax<- function(time        = NULL,
       Bmeans <- as.vector(B %*% means)  
       Bcov <-  B%*%cov.tst.1%*% t(B)
       Bcor <- cov2cor(Bcov)
-      prob.selection[i] <- min(pmvnorm(lower=rep(0, length(all.cindex)), upper=Inf, corr=Bcor, algorithm = Miwa()),1)
+      prob.selection[i] <- pmvnorm(lower=rep(0, length(all.cindex)), 
+                                   upper=Inf, 
+                                   corr=Bcor, 
+                                   algorithm = GenzBretz(maxpts=50000,abseps=0.00001))
       
       wt.rslt2 <- wt.rslt1.1[,i]
       
