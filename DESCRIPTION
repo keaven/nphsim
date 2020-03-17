@@ -17,8 +17,7 @@ Imports:
   ggplot2
 Suggests:
   knitr,
-  rmarkdown,
-  testthat
+  rmarkdown
 Depends:
   survival,
   survMisc,
