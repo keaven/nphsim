@@ -78,8 +78,8 @@ rm.combo.WLRmax<- function(time        = NULL,
     
     tst.rslt1 <- rbind(tst.rslt[1,],subset(tst.rslt, grepl("FH", tst.rslt$W)))
     Z.tst.rslt1 <- tst.rslt1$Z
-    if(one.sided){p.unadjusted <- pnorm(q=tst.rslt1$Z)}
-    if(!one.sided){p.unadjusted <- 1- pnorm(q=abs(tst.rslt1$Z)) + pnorm(q=-abs(tst.rslt1$Z))}
+    if(one.sided){p.unadjusted <- stats::pnorm(q=tst.rslt1$Z)}
+    if(!one.sided){p.unadjusted <- 1- stats::pnorm(q=abs(tst.rslt1$Z)) + stats::pnorm(q=-abs(tst.rslt1$Z))}
     
     pval.adjusted <- p.adjust(p.unadjusted, method = adjust.methods)
     pval <- min(pval.adjusted)
@@ -164,7 +164,7 @@ rm.combo.WLRmax<- function(time        = NULL,
     
     if(!one.sided){pval <- 1 - min(1, pmvnorm(lower = rep(-z.max, length(Z.tst.rslt1)), upper= rep(z.max, length(Z.tst.rslt1)), corr= cor.tst, algorithm= Miwa())[1])}
     
-    p.unadjusted <- pnorm(q=tst.rslt1$Z)
+    p.unadjusted <- stats::pnorm(q=tst.rslt1$Z)
     max.index <- which(p.unadjusted == min(p.unadjusted), arr.ind = TRUE)
     #max.index <- which(abs(Z.tst.rslt1) == max(abs(Z.tst.rslt1)), arr.ind = TRUE) 
     
@@ -175,7 +175,7 @@ rm.combo.WLRmax<- function(time        = NULL,
   if(!max){
     
     tst.rslt1 <- subset(tst.rslt, grepl("FH", tst.rslt$W))
-    pval <- pnorm(q=tst.rslt1$Z)
+    pval <- stats::pnorm(q=tst.rslt1$Z)
     p.unadjusted <- pval
     max.index <- NULL
     
@@ -229,7 +229,7 @@ rm.combo.WLRmax<- function(time        = NULL,
   data.anal.w$wt2 <- -log(data.anal.w$wt)
   data.anal.w$id <- 1:nrow(data.anal.w)
   
-  FH.est <- coxph(Surv(time, status) ~ arm + offset(wt2)+ cluster(id), weight=wt,  method= ties.method, data = data.anal.w)
+  FH.est <- coxph(Surv(time, status) ~ arm + offset(wt2)+ cluster(id), weights=wt,  method= ties.method, data = data.anal.w)
   
   hr <- summary(FH.est)
   hr.est <- hr$conf.int[1]
@@ -242,8 +242,8 @@ rm.combo.WLRmax<- function(time        = NULL,
     
     #Bonferroni adjustment
     
-    hr.low.adjusted.BF <- exp(log(hr.est) - (qnorm(1- (alpha/(length(wt) + 1))))*hr$coefficients[4]) 
-    hr.up.adjusted.BF <-  exp(log(hr.est) + (qnorm(1- (alpha/(length(wt) + 1))))*hr$coefficients[4]) 
+    hr.low.adjusted.BF <- exp(log(hr.est) - (stats::qnorm(1- (alpha/(length(wt) + 1))))*hr$coefficients[4]) 
+    hr.up.adjusted.BF <-  exp(log(hr.est) + (stats::qnorm(1- (alpha/(length(wt) + 1))))*hr$coefficients[4]) 
     
   }
   
@@ -314,7 +314,7 @@ rm.combo.WLRmax<- function(time        = NULL,
       data.anal.w2$wt2 <- -log(data.anal.w2$wt)
       
       
-      FH.est2 <- coxph(Surv(time, status) ~ arm + offset(wt2), weight=wt,  method= ties.method, data = data.anal.w2)
+      FH.est2 <- coxph(Surv(time, status) ~ arm + offset(wt2), weights=wt,  method= ties.method, data = data.anal.w2)
       
       hr2 <- summary(FH.est2)
       hr.est2[i] <- hr2$conf.int[1]
@@ -327,8 +327,8 @@ rm.combo.WLRmax<- function(time        = NULL,
     prob.selection2 <- prob.selection/sum(prob.selection)
     hr.est.HT <- exp(as.numeric(prob.selection2%*%log(hr.est2)))
     hr.est.HT.se <- sqrt(as.numeric(prob.selection2%*%hr.est2.se^2) + as.numeric(prob.selection2%*%log(hr.est2)^2) - (log(hr.est.HT))^2)
-    hr.low.HT <- exp(log(hr.est.HT) - (qnorm(1- alpha)*hr.est.HT.se)) 
-    hr.up.HT <-  exp(log(hr.est.HT) + (qnorm(1- alpha)*hr.est.HT.se)) 
+    hr.low.HT <- exp(log(hr.est.HT) - (stats::qnorm(1- alpha)*hr.est.HT.se)) 
+    hr.up.HT <-  exp(log(hr.est.HT) + (stats::qnorm(1- alpha)*hr.est.HT.se)) 
     
   }
   

@@ -3,7 +3,7 @@ summary.cox<-function(data.cox,b.true,rho,gamma){
   bhat<-c(data.cox[,"bhat"])
   hr.true<-exp(b.true)
   avg.hr<-mean(exp(bhat),na.rm=TRUE)
-  se.hr<-sqrt(var(exp(bhat),na.rm=TRUE))
+  se.hr<-sqrt(stats::var(exp(bhat),na.rm=TRUE))
   sebhats<-c(data.cox[,"sehat"])
   se.hr.hats<-sqrt((sebhats^2)*((exp(bhat)^2)))
   avg.sehr<-mean(se.hr.hats,na.rm=TRUE)
@@ -163,7 +163,7 @@ if(est.method=="score"){
   
 # Solve score directly
   
-get.Cox<-uniroot(f=cox.score.rhogamma,interval=c(-15,15),extendInt="yes",tol=10^-16,
+get.Cox<-stats::uniroot(f=cox.score.rhogamma,interval=c(-15,15),extendInt="yes",tol=10^-16,
                  time=time,delta=delta,z=z,rho=rho,gamma=gamma,km.pool=km.pool,
                  t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
 if(details){
@@ -182,7 +182,7 @@ bhat.rhogamma<-get.Cox$root
 
 if(est.method=="plik"){
 
-get.Cox<-optimize(f=cox.plik.rhogamma,interval=c(-15,15),maximum=TRUE,
+get.Cox<-stats::optimize(f=cox.plik.rhogamma,interval=c(-15,15),maximum=TRUE,
                   time=time,delta=delta,z=z,rho=rho,gamma=gamma,km.pool=km.pool,
                   t.tau=t.tau,w0.tau=w0.tau,w1.tau=w1.tau)
 if(details){
@@ -357,7 +357,7 @@ if(round(dd/draws,digits=3)==0.90) cat("90% resampling done","\n")
 }
 Z.bstar<-bhat.center.star/sig.beta
 
-var.bhat<-var(bhat.center.star,na.rm=TRUE)
+var.bhat<-stats::var(bhat.center.star,na.rm=TRUE)
 if(details){
 #cat("U(bhat) cov. term=",c(sig.z1z0),"\n")
 cat("Re-sampling SE estimates=",c(sqrt(var.bhat)),"\n")
@@ -394,7 +394,7 @@ fit.resample<-cox.rhogamma.resample(bhat=bhat,time=time,delta=delta,z=z,draws=dr
                             G1.draws=G1.draws,G0.draws=G0.draws)
 bhat<-c(bhat)
 se.asy<-fit.resample$se.beta
-if(draws>0) se.resample<-sqrt(var(fit.resample$bhat.star))
+if(draws>0) se.resample<-sqrt(stats::var(fit.resample$bhat.star))
 
 # Use asymptotic se as default
 # For resampling, the bias-corrected is used

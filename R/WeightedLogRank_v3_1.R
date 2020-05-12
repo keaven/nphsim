@@ -40,7 +40,7 @@ cnorm<-function(z,thresh=3.6,delta=0.6,kk=4){
      check<-T
   }
   if(z<thresh){
-     out<-1-pnorm(z)
+     out<-1-stats::pnorm(z)
   }else{
      term<-1
      tally<-term
@@ -52,7 +52,7 @@ cnorm<-function(z,thresh=3.6,delta=0.6,kk=4){
      }
      out<-tally*dnorm(z)/z
      if(z<thresh+delta){
-          x<-1-pnorm(z)
+          x<-1-stats::pnorm(z)
           out<-x+(z-thresh)*(out-x)/delta
      }
   }
@@ -248,7 +248,7 @@ weight.Logrank<-function(time,delta,z,rho=0,gamma=0){
 #temp<-temp[1:(length(temp)-1)]
 #S.pool.check<-c(1,temp) # S.pool(t-)
 #plot(at.points,S.pool,type="s",lty=1,col="grey",lwd=3)
-#lines(at.points,S.pool.check,lty=2,type="s",col="red",lwd=2)
+#graphics::graphics::lines(at.points,S.pool.check,lty=2,type="s",col="red",lwd=2)
 
   K<-ifelse(risk.pooled>0,w*(risk.z0*risk.z1)/risk.pooled,0.0)
 
@@ -266,7 +266,7 @@ weight.Logrank<-function(time,delta,z,rho=0,gamma=0){
   sig2<-sum(sig2s)
 
   Z.lr<-lr/sqrt(sig2)
-  result<-list(Z.lr=Z.lr,pval=1-pchisq(Z.lr^2,1),score=lr,sig2=sig2)
+  result<-list(Z.lr=Z.lr,pval=1-stats::pchisq(Z.lr^2,1),score=lr,sig2=sig2)
   return(result)
 } # end of weight.Logrank
 
@@ -402,7 +402,7 @@ combo2.logrank<-function(time,delta,z,draws=0,rho.gamma=c(0,0),include.gehan=FAL
     diff<-round(c(S0.check$surv-S0.match),2)
     if(max(abs(diff))>0){
       plot(temp0,col="grey",lwd=5,conf.int=FALSE)
-      lines(jump.points,S0.KM,type="s",lty=2,col="black",lwd=2)
+      graphics::lines(jump.points,S0.KM,type="s",lty=2,col="black",lwd=2)
       stop("Problem in KM Estimator: S0.match vs surv()")
     }
     S1.KM<-cumprod(1-(DN1/Y1))
@@ -417,7 +417,7 @@ combo2.logrank<-function(time,delta,z,draws=0,rho.gamma=c(0,0),include.gehan=FAL
     if(max(abs(diff))>0){
       print(cbind(jump.points[at1],S1.match,temp1$time[at1.check],S1.check$surv,S1.check$surv-S1.match))
       plot(temp1,col="grey",lwd=5,conf.int=FALSE)
-      lines(jump.points,S1.KM,type="s",lty=2,col="black",lwd=2)
+      graphics::lines(jump.points,S1.KM,type="s",lty=2,col="black",lwd=2)
       stop("Problem in KM Estimator: S1.match vs surv()")
    }
   }  # End checking KM
@@ -459,8 +459,8 @@ combo2.logrank<-function(time,delta,z,draws=0,rho.gamma=c(0,0),include.gehan=FAL
 # Initialize g*'s for each treatment group
   if(draws>0){
 #set.seed(8316951)
-    G0.draws<-matrix(rnorm(draws*n0),ncol=draws)
-    G1.draws<-matrix(rnorm(draws*n1),ncol=draws)
+    G0.draws<-matrix(stats::rnorm(draws*n0),ncol=draws)
+    G1.draws<-matrix(stats::rnorm(draws*n1),ncol=draws)
   }
 # Correlation is accounted for by using the same g's
 # accross the weighted-log rank statistics
@@ -577,10 +577,10 @@ combo2.logrank<-function(time,delta,z,draws=0,rho.gamma=c(0,0),include.gehan=FAL
 # Individual 
 # Standard 1-sided (superiority) Pvalue
 # Note: Aymptotics only available [here] for Zstat.type="overall"
-  pval.Z.asy<-c(1-pnorm(Z.rg.obs.vec))
+  pval.Z.asy<-c(1-stats::pnorm(Z.rg.obs.vec))
 
 # Un-adjusted p-value (will adjust when calculating rejections)
-  pz.combo.naive<-c(1-pnorm(Z.combo))
+  pz.combo.naive<-c(1-stats::pnorm(Z.combo))
 
 # SM denotes 'synthetic-martingale' resampling
 # ... to differentiate with asymptotic for overall Zstat
@@ -597,7 +597,7 @@ combo2.logrank<-function(time,delta,z,draws=0,rho.gamma=c(0,0),include.gehan=FAL
       if(details){
         cat("rho,gamma=",rho.gamma.mat[rg,],"\n")
         cat("Standard weighted Log-Rank: Z,Z^2",c(Z.rg.obs.vec[rg],Z.rg.obs.vec[rg]^2),"\n")
-        cat("Standard wLR 2-sided Pvalue",c(1-pchisq(Z.rg.obs.vec[rg]^2,1)),"\n")
+        cat("Standard wLR 2-sided Pvalue",c(1-stats::pchisq(Z.rg.obs.vec[rg]^2,1)),"\n")
       }
       if(rho.gamma.mat[rg,1]==0 & rho.gamma.mat[rg,2]==0){
         checkit<-survdiff(Surv(time,delta)~z)
