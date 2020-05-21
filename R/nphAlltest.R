@@ -93,15 +93,22 @@ nphAlltest <- function(survival,cnsr,trt,cutpt=median(survival),
                             fun="cumhaz",
                             palette=c("#1B9E77","#D95F02"),
                             risk.table=TRUE)
-  km.plot <- autoplot(fit,
-                      title=KMtitle,
-                      xLab='Time',
-                      yLab='Survival Probability',
-                      tabTitleSize=10, 
-                      nRiskSize=4,
-                      yScale='frac',
-                      censSize=2)
+  km.plot <- ggsurvplot(fit,data=d,
+                            title=KMtitle,
+                            fun=NULL,
+                            palette=c("#1B9E77","#D95F02"),
+                            risk.table=TRUE)
+# Following was replaced by code above; KA: 6/30/2019
+  # km.plot <- autoplot(fit,
+  #                     title=KMtitle,
+  #                     xLab='Time',
+  #                     yLab='Survival Probability',
+  #                     tabTitleSize=10,
+  #                     nRiskSize=4,
+  #                     yScale='frac',
+  #                     censSize=2)
   
   return (list(summary.stat=out.stat,hr.pe=hr.pe,cumhaz.plot=cumhaz.plot,
-               km.plot=km.plot,zph.plot=zph.plot,fit=fit))
+               km.plot=km.plot,
+               zph.plot=zph.plot,fit=fit))
 }

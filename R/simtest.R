@@ -163,7 +163,7 @@ simtest <- function(x
                      #ct = x$simd$survival + x$simd$enterT, # ct is added in nphsim returned value so this is not needed
                      k = 1)
     setorderv(dt, c("sim", "cnsr", "ct"), c(1, 1, 1))
-    dt <- dt[, evn := c(1:(x$ssC + x$ssE))
+    dt <- dt[, evn := rep(c(1:(x$ssC + x$ssE)),x$nsim) # line updated by Ray Lin
              ][, evn := ifelse(cnsr == 1, 9999, evn)]
     DT.D <- data.table(D = anaD,
                        analysis = c(1:length(anaD)),

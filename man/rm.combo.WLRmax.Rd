@@ -5,9 +5,9 @@
 \title{Weighted Logrank combination with asymptotic p-value adjustment}
 \usage{
 rm.combo.WLRmax(time = NULL, status = NULL, arm = NULL, wt = NULL,
-  adjust.methods = c("holm", "hochberg", "hommel", "bonferroni", "asymp")[5],
-  ties.method = c("exact", "breslow", "efron")[2], one.sided = FALSE,
-  HT.est = FALSE, max = TRUE, alpha = 0.025)
+  adjust.methods = c("holm", "hochberg", "hommel", "bonferroni",
+  "asymp")[5], ties.method = c("exact", "breslow", "efron")[2],
+  one.sided = FALSE, HT.est = FALSE, max = TRUE, alpha = 0.025)
 }
 \arguments{
 \item{time}{time-to-event variable}

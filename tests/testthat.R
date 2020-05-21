@@ -1,4 +1,4 @@
-library(testthat)
-library(nphsim)
+#library(testthat)
+#library(nphsim)
 
-test_check("nphsim")
+# test_check("nphsim")

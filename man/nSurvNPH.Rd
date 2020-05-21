@@ -4,11 +4,11 @@
 \alias{nSurvNPH}
 \title{Sample Size Under Non-Propotional Hazards Assumptions}
 \usage{
-nSurvNPH(lambdaC = log(2)/6, hr = 0.6, hr0 = 1, etaC = 0, etaE = NULL,
-  NONCMPL = 0, DROPIN = 0, gamma = 1, R = 12, S = NULL, T = NULL,
-  minfup = NULL, ratio = 1, alpha = 0.025, beta = 0.1, sided = 1,
-  tol = .Machine$double.eps^0.25, SBDV = 20, SIMULT = FALSE,
-  TRT_LAG = 0, nstrata = 1)
+nSurvNPH(lambdaC = log(2)/6, hr = 0.6, hr0 = 1, etaC = 0,
+  etaE = NULL, NONCMPL = 0, DROPIN = 0, gamma = 1, R = 12,
+  S = NULL, T = NULL, minfup = NULL, ratio = 1, alpha = 0.025,
+  beta = 0.1, sided = 1, tol = .Machine$double.eps^0.25, SBDV = 20,
+  SIMULT = FALSE, TRT_LAG = 0, nstrata = 1)
 }
 \arguments{
 \item{lambdaC}{scalar, vector or matrix of event hazard rates for the 

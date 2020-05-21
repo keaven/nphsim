@@ -4,8 +4,8 @@
 \alias{simtestp}
 \title{Simulation of Time-to-Event P-Values}
 \usage{
-simtestp(x, anaT = NULL, anaD = NULL, anatype = "event", method = NULL,
-  stratum = NULL, fparam = NULL, d = NULL)
+simtestp(x, anaT = NULL, anaD = NULL, anatype = "event",
+  method = NULL, stratum = NULL, fparam = NULL, d = NULL)
 }
 \arguments{
 \item{x}{list genearted by simulation}

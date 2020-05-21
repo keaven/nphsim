@@ -4,9 +4,10 @@
 \alias{nphsim}
 \title{Simulate a Clinical Trial with Piecewise Exponential Time-to-Event Outcomes}
 \usage{
-nphsim(nsim = 100, lambdaC = NULL, lambdaE = NULL, intervals = NULL,
-  ssC = NULL, ssE = NULL, gamma = NULL, R = NULL,
-  fixEnrollTime = TRUE, eta = NULL, etaE = NULL, d = NULL)
+nphsim(nsim = 100, lambdaC = NULL, lambdaE = NULL,
+  intervals = NULL, ssC = NULL, ssE = NULL, gamma = NULL,
+  R = NULL, fixEnrollTime = TRUE, eta = NULL, etaE = NULL,
+  d = NULL)
 }
 \arguments{
 \item{nsim}{Number of simulations}
